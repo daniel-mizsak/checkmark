@@ -1,0 +1,39 @@
+# Project
+data/app_data/checkmark.log
+data/app_data/data.json
+data/generated_documents/
+
+# System
+.DS_Store
+
+# Distribution / Packaging
+build/
+dist/
+eggs/
+.eggs/
+sdist/
+wheels/
+*.egg-info/
+*.egg
+
+# Unit tests / Coverage reports
+.tox
+.coverage
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Python
+__pycache__/
+.ipynb_checkpoints
+*.egg-info/
+*.log
+*.py[cod]
+*$py.class
+
+# IDE
+.idea/
+.vscode/
