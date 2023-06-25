@@ -1,9 +1,16 @@
+"""
+Graphical User Interface that aggregates necessary information for assessment generation.
+
+@author "Dániel Lajos Mizsák" <info@pythonvilag.hu>
+"""
+
+from __future__ import annotations
+
 import json
 import os
+import platform
 import random
-import re
 import subprocess
-import sys
 import tkinter as tk
 import webbrowser
 from tkinter import messagebox
@@ -11,25 +18,32 @@ from tkinter import messagebox
 import requests
 import ttkbootstrap as ttk
 from ttkbootstrap import Style
-from ttkbootstrap.constants import INFO, OUTLINE
 
-from checkmark.generator.generate import generate_assessment
+from checkmark.generator.generate import CheckmarkFields, generate_assessment
 
 
 class GeneratorInterface(tk.Tk):
+    """
+    Graphical User Interface for assessment generation.
+    """
+
     def __init__(self) -> None:
+        # TODO: Support multiple languages
         tk.Tk.__init__(self)
+        with open("data/app/interface_language.json", "r", encoding="utf-8") as f:
+            self.interface_language = json.load(f)["generator"]["ENG"]
+
         self.iconphoto(True, tk.PhotoImage(file="data/app/icon_g.png"))
+        self.wm_title(self.interface_language["title"])
         window_width = 680
         window_height = 440
-
-        # TODO: Add icon
-        self.wm_title("Checkmark Generator")
-        self.wm_geometry(f"{window_width}x{window_height}+200+200")
+        top_left_x = (self.winfo_screenwidth() - window_width) // 2
+        top_left_y = (self.winfo_screenheight() - window_height) // 2
+        self.wm_geometry(f"{window_width}x{window_height}+{top_left_x}+{top_left_y}")
         self.wm_resizable(False, False)
         self.style = Style(theme="superhero")
 
-        self.validator = InterfaceValidation()
+        self.validator = InterfaceValidation(self)
 
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
@@ -54,9 +68,14 @@ class GeneratorInterface(tk.Tk):
 
 
 class TopicPage(tk.Frame):
+    """
+    Top-Left part of the GUI. Responsible for selecting the class, subject and topic.
+    """
+
     def __init__(self, parent: tk.Frame, controller: GeneratorInterface) -> None:
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.topic_page_language = controller.interface_language["topic_page"]
 
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=0)
@@ -65,11 +84,11 @@ class TopicPage(tk.Frame):
 
         # Class
         # TODO: Add styling to dropdown menu as well
-        self.class_label = tk.Label(self, text="Osztály")
-        self.available_classes = self.list_available_classes()
+        self.class_label = tk.Label(self, text=self.topic_page_language["class_label"])
+        self.available_classes = self._list_available_classes()
         self.class_stringvar = tk.StringVar()
-        self.class_stringvar.set("Osztály kiválasztása")
-        self.class_stringvar.trace("w", self.reset_subjects_and_update_student_listbox)
+        self.class_stringvar.set(self.topic_page_language["class_stringvar"])
+        self.class_stringvar.trace("w", self._reset_subjects_and_update_student_listbox)
         self.class_menubutton = ttk.Menubutton(
             self,
             text=self.class_stringvar.get(),
@@ -86,10 +105,11 @@ class TopicPage(tk.Frame):
         self.class_menubutton["menu"] = self.class_menu
 
         # Subject
-        self.subject_label = tk.Label(self, text="Tantárgy")
+        self.subject_label = tk.Label(self, text=self.topic_page_language["subject_label"])
+        self.available_subjects: list[str] = []
         self.subject_stringvar = tk.StringVar()
-        self.subject_stringvar.set("Tantárgy kiválasztása")
-        self.subject_stringvar.trace("w", self.reset_topics)
+        self.subject_stringvar.set(self.topic_page_language["subject_stringvar"])
+        self.subject_stringvar.trace("w", self._reset_topics)
         self.subject_menubutton = ttk.Menubutton(
             self,
             text=self.subject_stringvar.get(),
@@ -100,10 +120,11 @@ class TopicPage(tk.Frame):
         self.subject_menu = tk.Menu(self.subject_menubutton, tearoff=0)
 
         # Topic
-        self.topic_label = tk.Label(self, text="Témakör")
+        self.topic_label = tk.Label(self, text=self.topic_page_language["topic_label"])
+        self.available_topics: list[str] = []
         self.topic_stringvar = tk.StringVar()
-        self.topic_stringvar.set("Témakör kiválasztása")
-        self.topic_stringvar.trace("w", self.change_topic_menubar_text)
+        self.topic_stringvar.set(self.topic_page_language["topic_stringvar"])
+        self.topic_stringvar.trace("w", self._change_topic_menubar_text)
         self.topic_menubutton = ttk.Menubutton(
             self,
             text=self.topic_stringvar.get(),
@@ -114,23 +135,25 @@ class TopicPage(tk.Frame):
         self.topic_menu = tk.Menu(self.topic_menubutton, tearoff=0)
 
         # Grid
-        self.class_label.grid(row=0, column=0, padx=10, pady=(15, 8), sticky="nw")
-        self.class_menubutton.grid(row=0, column=1, padx=10, pady=(15, 8), sticky="ne")
+        self.class_label.grid(row=0, column=0, padx=10, pady=(18, 8), sticky="nw")
+        self.class_menubutton.grid(row=0, column=1, padx=10, pady=(18, 8), sticky="ne")
         self.subject_label.grid(row=1, column=0, padx=10, pady=8, sticky="nw")
         self.subject_menubutton.grid(row=1, column=1, padx=10, pady=8, sticky="ne")
-        self.topic_label.grid(row=2, column=0, padx=10, pady=8, sticky="nw")
-        self.topic_menubutton.grid(row=2, column=1, padx=10, pady=8, sticky="ne")
+        self.topic_label.grid(row=2, column=0, padx=10, pady=(8, 18), sticky="nw")
+        self.topic_menubutton.grid(row=2, column=1, padx=10, pady=(8, 18), sticky="ne")
 
-    def reset_subjects_and_update_student_listbox(self, *args: str) -> None:
+    def _reset_subjects_and_update_student_listbox(self, *args: str) -> None:
+        """Function to reset the subject and update the student list when the class is changed."""
         self.class_menubutton.configure(text=self.class_stringvar.get())
-        self.reset_subjects()
+        self._reset_subjects()
         self.controller.student_page.update_student_listbox()
 
-    def reset_subjects(self) -> None:
+    def _reset_subjects(self) -> None:
+        """Reloads the possible subjects based on the selected class."""
         class_number = self.class_stringvar.get().split("-")[0]
-        self.available_subjects = self.list_available_subjects(class_number)
+        self.available_subjects = self._list_available_subjects(class_number)
 
-        self.subject_stringvar.set("Tantárgy kiválasztása")
+        self.subject_stringvar.set(self.topic_page_language["subject_stringvar"])
         self.subject_menubutton.configure(state="normal")
         self.subject_menu.delete(0, "end")
 
@@ -142,24 +165,25 @@ class TopicPage(tk.Frame):
                 variable=self.subject_stringvar,
             )
         self.subject_menubutton["menu"] = self.subject_menu
-        self.reset_topics()
+        self._reset_topics()
 
-    def reset_topics(self, *args: str) -> None:
+    def _reset_topics(self, *args: str) -> None:
+        """Reloads the possible topics based on the selected class and subject."""
         class_number = self.class_stringvar.get()
         subject_name = self.subject_stringvar.get()
 
         self.subject_menubutton.configure(text=subject_name)
-        self.topic_stringvar.set("Témakör kiválasztása")
+        self.topic_stringvar.set(self.topic_page_language["topic_stringvar"])
 
-        # TODO: There should be a better way to do this
-        if subject_name == "Tantárgy kiválasztása":
+        # TODO: There might be a better way to do this
+        if subject_name == self.topic_page_language["subject_stringvar"]:
             self.topic_menubutton.configure(state="disabled")
             self.topic_menu.delete(0, "end")
         else:
             self.topic_menubutton.configure(state="normal")
             self.topic_menu.delete(0, "end")
 
-            self.available_topics = self.list_available_topics(
+            self.available_topics = self._list_available_topics(
                 class_number.split("-")[0],
                 subject_name.split("-")[0],
             )
@@ -175,11 +199,18 @@ class TopicPage(tk.Frame):
                 )
             self.topic_menubutton["menu"] = self.topic_menu
 
-    def change_topic_menubar_text(self, *args: str) -> None:
+    def _change_topic_menubar_text(self, *args: str) -> None:
+        """Change the text of the topic menubar when a topic is selected."""
         self.topic_menubutton.configure(text=self.topic_stringvar.get())
 
     @staticmethod
-    def list_available_classes() -> list[str]:
+    def _list_available_classes() -> list[str]:
+        """
+        Checks the "data/classes" directory for .csv files for available classes.
+
+        Returns:
+            list[str]: List of the class numbers in ascending order.
+        """
         available_classes = []
         for class_name in os.listdir("data/classes"):
             if class_name.endswith(".csv"):
@@ -194,7 +225,17 @@ class TopicPage(tk.Frame):
         return available_classes
 
     @staticmethod
-    def list_available_subjects(class_number: str) -> list[str]:
+    def _list_available_subjects(class_number: str) -> list[str]:
+        """
+        Checks the "data/assessments" directory for available subjects that corresponds
+        to the selected class.
+
+        Args:
+            class_number (str): The number of the selected class.
+
+        Returns:
+            list[str]: List of the available subjects in ascending order.
+        """
         available_subjects = []
         for subject_name in os.listdir("data/assessments"):
             subject_name_is_directory = os.path.isdir(f"data/assessments/{subject_name}")
@@ -205,24 +246,40 @@ class TopicPage(tk.Frame):
         return available_subjects
 
     @staticmethod
-    def list_available_topics(class_number: str, subject_name: str) -> list[str]:
+    def _list_available_topics(class_number: str, subject_name: str) -> list[str]:
+        """
+        Checks the "data/assessments" directory for available topics that corresponds to
+        the selected class and subject.
+
+        Args:
+            class_number (str): Number of the selected class.
+            subject_name (str): Name of the selected subject.
+
+        Returns:
+            list[str]: List of the available topics in ascending order.
+        """
         available_topics = []
         for topic_name in os.listdir(f"data/assessments/{subject_name}-{class_number}"):
             if topic_name.endswith(".xlsx"):
                 available_topics.append(topic_name)
 
-        def compare_topic_numbers(topic_name: str) -> tuple[int, str]:
+        def _compare_topic_numbers(topic_name: str) -> tuple[int, str]:
             number, letter = topic_name.split("_", maxsplit=1)
             return int(number), letter
 
-        available_topics = sorted(list(set(available_topics)), key=compare_topic_numbers)
+        available_topics = sorted(list(set(available_topics)), key=_compare_topic_numbers)
         return available_topics
 
 
 class StudentPage(tk.Frame):
+    """
+    Top-Right part of the GUI. Responsible for selecting the students.
+    """
+
     def __init__(self, parent: tk.Frame, controller: GeneratorInterface) -> None:
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.student_page_language = self.controller.interface_language["student_page"]
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -231,35 +288,37 @@ class StudentPage(tk.Frame):
         self.grid_rowconfigure(3, weight=1)
 
         # Student number
-        self.student_number_label = ttk.Label(self, text="Sorsolt diák szám")
+        self.student_number_label = ttk.Label(
+            self, text=self.student_page_language["student_number_label"]
+        )
         self.student_number_spinbox = ttk.Spinbox(self, from_=1, to=40, width=5)
         self.student_number_spinbox.set(5)
 
         # Select random students
         self.select_random_students_button = ttk.Button(
             self,
-            text="Sorsolj",
-            command=self.select_random_students,
-            bootstyle=(INFO, OUTLINE),
+            text=self.student_page_language["select_random_students_button"],
+            command=self._select_random_students,
+            bootstyle=("info", "outline"),
             width=10,
         )
 
         # Select students
         self.select_students_button = ttk.Button(
             self,
-            text="Összes",
-            command=self.select_students,
-            bootstyle=(INFO, OUTLINE),
+            text=self.student_page_language["select_students_button_all"],
+            command=self._select_students,
+            bootstyle=("info", "outline"),
             width=10,
         )
 
         # Students
         # TODO: Change the color of the selected items for better visibility
-        # TODO: When double clicking other field it deselects the selected items
+        # TODO: When double clicking other field it deselects the previously selected items
         self.available_students: list[str] = []
         self.student_listbox = tk.Listbox(self, selectmode="multiple")
         self.student_listbox.event_generate("<<ListboxSelect>>")
-        self.student_listbox.bind("<<ListboxSelect>>", self.update_select_button)
+        self.student_listbox.bind("<<ListboxSelect>>", self._update_select_button)
 
         self.student_listbox_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.student_listbox_scrollbar.config(command=self.student_listbox.yview)
@@ -267,10 +326,10 @@ class StudentPage(tk.Frame):
 
         # Grid
         self.student_number_label.grid(
-            row=0, column=0, columnspan=2, padx=10, pady=(15, 8), sticky="nw"
+            row=0, column=0, columnspan=2, padx=10, pady=(18, 8), sticky="nw"
         )
         self.student_number_spinbox.grid(
-            row=0, column=2, columnspan=2, padx=10, pady=(15, 8), sticky="ne"
+            row=0, column=2, columnspan=2, padx=10, pady=(18, 8), sticky="ne"
         )
         self.select_random_students_button.grid(row=1, column=0, padx=10, pady=8, sticky="nw")
         self.select_students_button.grid(
@@ -282,6 +341,7 @@ class StudentPage(tk.Frame):
         self.student_listbox_scrollbar.grid(row=3, column=3, padx=(0, 10), pady=8, sticky="ns")
 
     def update_student_listbox(self) -> None:
+        """Updates the student listbox with the available students from the selected class."""
         class_selected = self.controller.topic_page.class_stringvar.get()
         with open(
             file=f"data/classes/{class_selected}.csv",
@@ -294,7 +354,8 @@ class StudentPage(tk.Frame):
         for available_student in self.available_students:
             self.student_listbox.insert(tk.END, available_student)
 
-    def select_random_students(self) -> None:
+    def _select_random_students(self) -> None:
+        """Selects the number of students randomly from the available students."""
         student_number = self.student_number_spinbox.get()
         if self.controller.validator.validate_student_number(
             student_number, self.available_students
@@ -304,27 +365,39 @@ class StudentPage(tk.Frame):
             self.student_listbox.selection_clear(0, tk.END)
             for student in students_selected:
                 self.student_listbox.selection_set(self.available_students.index(student))
-            self.update_select_button()
+            self._update_select_button()
 
-    def select_students(self) -> None:
+    def _select_students(self) -> None:
+        """Selects all of the student if any of them are not selected,
+        otherwise deselects all of them."""
         if self.controller.validator.validate_available_students(self.available_students):
             if len(self.student_listbox.curselection()) != len(self.available_students):
                 self.student_listbox.selection_set(0, tk.END)
             else:
                 self.student_listbox.selection_clear(0, tk.END)
-            self.update_select_button()
+            self._update_select_button()
 
-    def update_select_button(self, *args) -> None:  # type: ignore
+    def _update_select_button(self, *args) -> None:  # type: ignore[no-untyped-def]
+        """Updates the text of the select students button."""
         if len(self.student_listbox.curselection()) != len(self.available_students):
-            self.select_students_button.configure(text="Összes")
+            self.select_students_button.configure(
+                text=self.student_page_language["select_students_button_all"]
+            )
         else:
-            self.select_students_button.configure(text="Egyik sem")
+            self.select_students_button.configure(
+                text=self.student_page_language["select_students_button_none"]
+            )
 
 
 class QuestionPage(tk.Frame):
+    """
+    Middle-Left part of the GUI. Responsible for the question specific settings.
+    """
+
     def __init__(self, parent: tk.Frame, controller: GeneratorInterface) -> None:
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.question_page_language = self.controller.interface_language["question_page"]
 
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=0)
@@ -333,14 +406,18 @@ class QuestionPage(tk.Frame):
         self.grid_columnconfigure(1, weight=1)
 
         # Question number
-        self.question_number_label = tk.Label(self, text="Kérdések száma")
+        self.question_number_label = tk.Label(
+            self, text=self.question_page_language["question_number_label"]
+        )
         self.question_number_spinbox = ttk.Spinbox(
             self, from_=1, to=20, textvariable=tk.IntVar(), width=5
         )
         self.question_number_spinbox.set(20)
 
         # Random question order
-        self.random_question_order_label = tk.Label(self, text="Véletlenszerű kérdés sorrend")
+        self.random_question_order_label = tk.Label(
+            self, text=self.question_page_language["random_question_order_label"]
+        )
         self.random_question_order_booleanvar = tk.BooleanVar(value=True)
         self.random_question_order_checkbutton = tk.Checkbutton(
             self,
@@ -350,7 +427,9 @@ class QuestionPage(tk.Frame):
         )
 
         # Random option order
-        self.random_option_order_label = tk.Label(self, text="Véletlenszerű opció sorrend")
+        self.random_option_order_label = tk.Label(
+            self, text=self.question_page_language["random_option_order_label"]
+        )
         self.random_option_order_booleanvar = tk.BooleanVar(value=True)
         self.random_option_order_checkbutton = tk.Checkbutton(
             self,
@@ -360,18 +439,25 @@ class QuestionPage(tk.Frame):
         )
 
         # Grid
-        self.question_number_label.grid(row=0, column=0, padx=10, pady=8, sticky="nw")
-        self.question_number_spinbox.grid(row=0, column=1, padx=10, pady=8, sticky="ne")
+        self.question_number_label.grid(row=0, column=0, padx=10, pady=(18, 8), sticky="nw")
+        self.question_number_spinbox.grid(row=0, column=1, padx=10, pady=(18, 8), sticky="ne")
         self.random_question_order_label.grid(row=1, column=0, padx=10, pady=8, sticky="nw")
         self.random_question_order_checkbutton.grid(row=1, column=1, padx=10, pady=8, sticky="ne")
-        self.random_option_order_label.grid(row=2, column=0, padx=10, pady=8, sticky="nw")
-        self.random_option_order_checkbutton.grid(row=2, column=1, padx=10, pady=8, sticky="ne")
+        self.random_option_order_label.grid(row=2, column=0, padx=10, pady=(8, 18), sticky="nw")
+        self.random_option_order_checkbutton.grid(
+            row=2, column=1, padx=10, pady=(8, 18), sticky="ne"
+        )
 
 
 class DataPage(tk.Frame):
+    """
+    Bottom-Left part of the GUI. Responsible for the general data settings.
+    """
+
     def __init__(self, parent: tk.Frame, controller: GeneratorInterface) -> None:
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.data_page_language = self.controller.interface_language["data_page"]
 
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=0)
@@ -379,13 +465,10 @@ class DataPage(tk.Frame):
         self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
 
-        # E-mail
-        self.email_label = tk.Label(self, text="E-mail cím")
-        self.email_entry = ttk.Entry(self, justify="left", width=20)
-        self.email_entry.insert(0, self.load_email())
-
         # Online evaluator
-        self.online_evaluator_label = tk.Label(self, text="Internetes javító létrehozása")
+        self.online_evaluator_label = tk.Label(
+            self, text=self.data_page_language["online_evaluator_label"]
+        )
         self.online_evaluator_booleanvar = tk.BooleanVar(value=False)
         self.online_evaluator_booleanvar.trace("w", self.online_evaluator_connection)
         self.online_evaluator_checkbutton = tk.Checkbutton(
@@ -396,50 +479,38 @@ class DataPage(tk.Frame):
         )
 
         # Date
-        self.date_label = tk.Label(self, text="Dátum")
+        self.date_label = tk.Label(self, text=self.data_page_language["date_label"])
         self.date_entry = ttk.DateEntry(self, width=10, dateformat="%Y-%m-%d", firstweekday=0)
 
         # Grid
-        self.email_label.grid(row=0, column=0, padx=10, pady=8, sticky="nw")
-        self.email_entry.grid(row=0, column=1, padx=10, pady=8, sticky="ne")
-        self.online_evaluator_label.grid(row=1, column=0, padx=10, pady=8, sticky="nw")
-        self.online_evaluator_checkbutton.grid(row=1, column=1, padx=10, pady=8, sticky="ne")
-        self.date_label.grid(row=2, column=0, padx=10, pady=(8, 15), sticky="nw")
-        self.date_entry.grid(row=2, column=1, padx=10, pady=(8, 15), sticky="ne")
+        self.online_evaluator_label.grid(row=0, column=0, padx=10, pady=(30, 8), sticky="nw")
+        self.online_evaluator_checkbutton.grid(row=0, column=1, padx=10, pady=(30, 8), sticky="ne")
+        self.date_label.grid(row=1, column=0, padx=10, pady=(8, 18), sticky="nw")
+        self.date_entry.grid(row=1, column=1, padx=10, pady=(8, 18), sticky="ne")
 
     def deselect_checkbutton(self) -> None:
+        """Deselects the online evaluator checkbutton if there is no connection."""
         self.online_evaluator_checkbutton.config(variable=tk.BooleanVar(value=False))
         self.online_evaluator_booleanvar.set(False)
         self.online_evaluator_checkbutton.config(variable=self.online_evaluator_booleanvar)
 
     def online_evaluator_connection(self, *args: str) -> None:
+        """Checks for online evaluator connection if the checkbutton is selected."""
         if self.online_evaluator_booleanvar.get():
             if not self.controller.validator.validate_online_evaluator_connection():
                 self.deselect_checkbutton()
 
-    @staticmethod
-    def load_email() -> str:
-        try:
-            with open("data/app_data/data.json", "r", encoding="utf-8") as f:
-                email_address = json.loads(f.read())["email"]
-        except FileNotFoundError:
-            email_address = ""
-        return email_address
-
-    @staticmethod
-    def save_email(email: str) -> None:
-        with open("data/app_data/data.json", "r+", encoding="utf-8") as f:
-            data = json.loads(f.read())
-            data["email"] = email
-            f.seek(0)
-            f.truncate()
-            json.dump(data, f, indent=4, ensure_ascii=False)
-
 
 class SubmitPage(tk.Frame):
+    """
+    Bottom-Right part of the GUI. Responsible for submitting the test and sending feedback.
+    """
+
     def __init__(self, parent: tk.Frame, controller: GeneratorInterface) -> None:
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.submit_page_language = self.controller.interface_language["submit_page"]
+        self.messagebox_language = self.controller.interface_language["messagebox"]
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -448,149 +519,180 @@ class SubmitPage(tk.Frame):
         self.controller.style.configure("my.info.Outline.TButton", font=(None, 18))
         self.submit_button = ttk.Button(
             self,
-            text="Küldés",
+            text=self.submit_page_language["submit_button"],
             command=self.submit,
         )
         self.submit_button.config(style="my.info.Outline.TButton")
 
         # Feedback
-        self.feedback_label = tk.Label(self, text="Visszajelzés küldése")
-        self.feedback_label.bind("<Button-1>", lambda e: self.send_feedback())
+        self.feedback_label = tk.Label(self, text=self.submit_page_language["feedback_label"])
+        self.feedback_label.bind(
+            "<Button-1>",
+            lambda e: self.send_feedback(self.submit_page_language["send_feedback_email_subject"]),
+        )
 
         # Grid
         self.submit_button.grid(
-            row=0, column=0, ipadx=20, ipady=12, padx=10, pady=(15, 8), sticky="n"
+            row=0, column=0, ipadx=20, ipady=12, padx=10, pady=(18, 8), sticky="n"
         )
-        self.feedback_label.grid(row=1, column=0, padx=10, pady=(8, 15), sticky="s")
+        self.feedback_label.grid(row=1, column=0, padx=10, pady=(8, 18), sticky="s")
 
     def submit(self) -> None:
+        """Collects the necessary data from all the pages and sends it to the generator function."""
+        # Class
+        class_ = self.controller.topic_page.class_stringvar.get()
+        subject = self.controller.topic_page.subject_stringvar.get()
+        topic = self.controller.topic_page.topic_stringvar.get()
         student_indices = self.controller.student_page.student_listbox.curselection()
-        checkmark_fields: dict[str, str | list[str] | bool | int] = {
-            "osztaly": str(self.controller.topic_page.class_stringvar.get()),
-            "tantargy": str(self.controller.topic_page.subject_stringvar.get()),
-            "temakor": str(self.controller.topic_page.topic_stringvar.get()),
-            "tanulok": list(
-                str(self.controller.student_page.student_listbox.get(index))
-                for index in student_indices
-            ),
-            "email": str(self.controller.data_page.email_entry.get()),
-            "online_kiertekeles": bool(self.controller.data_page.online_evaluator_booleanvar.get()),
-            "datum": str(self.controller.data_page.date_entry.entry.get()),
-            "kerdesek_szama": int(
-                self.controller.question_page.question_number_spinbox.get()
-            ),  # TODO: Validate before converting
-            "veletlenszeru_kerdesek": bool(
-                self.controller.question_page.random_question_order_booleanvar.get()
-            ),
-            "veletlenszeru_valaszok": bool(
-                self.controller.question_page.random_option_order_booleanvar.get()
-            ),
-        }
+        students = [
+            self.controller.student_page.student_listbox.get(index) for index in student_indices
+        ]
+        online_evaluator = self.controller.data_page.online_evaluator_booleanvar.get()
+        date = self.controller.data_page.date_entry.entry.get()
+        question_number = self.controller.question_page.question_number_spinbox.get()
+        random_question_order = self.controller.question_page.random_question_order_booleanvar.get()
+        random_option_order = self.controller.question_page.random_option_order_booleanvar.get()
 
-        if not self.controller.validator.validate_checkmark_fields(checkmark_fields):
+        if not (
+            self.controller.validator.validate_class(class_)
+            and self.controller.validator.validate_subject(subject)
+            and self.controller.validator.validate_topic(topic)
+            and self.controller.validator.validate_students(students)
+            and self.controller.validator.validate_date(date)
+            and self.controller.validator.validate_question_number(question_number)
+        ):
             return
 
-        self.controller.data_page.save_email(str(checkmark_fields["email"]))
+        checkmark_fields = CheckmarkFields(
+            class_=class_,
+            subject=subject,
+            topic=topic,
+            students=students,
+            online_evaluator=online_evaluator,
+            date=date,
+            question_number=int(question_number),
+            random_question_order=random_question_order,
+            random_option_order=random_option_order,
+        )
 
         try:
-            generate_assessment(**checkmark_fields)  # type: ignore
-            messagebox.showinfo("Siker!", "A dolgozatok elkészültek!")
-        except Exception as e:
-            messagebox.showerror("Hiba!", f"Hiba történt a dolgozatok elkészítése során:\n{e}")
+            generate_assessment(checkmark_fields)
+            open_folder = messagebox.askquestion(
+                title="Siker!",
+                message="A dolgozatok elkészültek. Szeretnéd megnyitni a mappát?",
+            )
+            if open_folder == "yes":
+                # Changing askquestion message box button text is a lot of extra effort.
+                self.open_generated_documents_folder(
+                    f"data/generated/{checkmark_fields.date}_{checkmark_fields.subject}_{checkmark_fields.class_}"
+                )
+
+        # TODO: Look for specific exceptions
+        except Exception as exception:
+            messagebox.showerror(
+                title="Hiba!",
+                message=f"Hiba történt a dolgozatok elkészítése során:\n{exception}",
+            )
 
     @staticmethod
-    def send_feedback() -> None:
+    def open_generated_documents_folder(path: str) -> None:
+        """Opens the folder where the generated documents are stored."""
+        system_platform = platform.system()
+        if system_platform == "Windows":
+            os.startfile(path)  # type: ignore[attr-defined]
+        elif system_platform == "Darwin":
+            subprocess.Popen(["open", path])
+        else:
+            subprocess.Popen(["xdg-open", path])
+
+    @staticmethod
+    def send_feedback(subject: str) -> None:
+        """Opens the default mail client to send feedback"""
         recipient = "info@pythonvilag.hu"
-        subject = "Checkmark visszajelzés"
         webbrowser.open("mailto:?to=" + recipient + "&subject=" + subject, new=1)
-
-    @staticmethod
-    def generate_subprocess_call(checkmark_fields: dict[str, str | list[str] | bool | int]) -> None:
-        """
-        This function can be used if we want to call the generate function from the command line,
-        instead of importing it.
-        """
-        # TODO: Fix problem regarding PYTHONPATH and subprocess
-        subprocess_call = [
-            sys.executable,
-            "-m checkmark.generator.generate",
-            f"--osztaly={checkmark_fields['osztaly']}",
-            f"--tantargy={checkmark_fields['tantargy']}",
-            f"--temakor={checkmark_fields['temakor']}",
-            *(f"--tanulok={student}" for student in checkmark_fields["tanulok"]),  # type: ignore
-            f"--email={checkmark_fields['email']}",
-            f"--datum={checkmark_fields['datum']}",
-            f"--kerdesek_szama={checkmark_fields['kerdesek_szama']}",
-        ]
-
-        if checkmark_fields["online_kiertekeles"]:
-            subprocess_call.append("--online_kiertekeles=1")
-        if checkmark_fields["veletlenszeru_kerdesek"]:
-            subprocess_call.append("--veletlenszeru_kerdesek=1")
-        if checkmark_fields["veletlenszeru_valaszok"]:
-            subprocess_call.append("--veletlenszeru_valaszok=1")
-
-        try:
-            checkmark_response = subprocess.check_output(subprocess_call)
-            messagebox.showinfo("Siker!", "A dolgozatok elkészültek!")
-        except subprocess.CalledProcessError:
-            # TODO: Give more information about the error
-            messagebox.showerror("Hiba!", "Valami hiba történt a dolgozatok elkészítése során.")
 
 
 class InterfaceValidation:
-    def validate_checkmark_fields(
-        self, checkmark_fields: dict[str, str | list[str] | bool | int]
-    ) -> bool:
-        missing_field_name = None
-        for field_name, field in checkmark_fields.items():
-            if field_name == "osztaly" and "kiválasztása" in str(field):
-                missing_field_name = "osztály"
-                break
-            elif field_name == "tantargy" and "kiválasztása" in str(field):
-                missing_field_name = "tantárgy"
-                break
-            elif field_name == "temakor" and "kiválasztása" in str(field):
-                missing_field_name = "témakör"
-                break
-            elif not field and field_name == "tanulok":
-                missing_field_name = "tanulók"
-                break
-            elif field_name == "email":
-                if not field:
-                    missing_field_name = "email"
-                    break
-                elif not self._validate_email(str(field)):
-                    messagebox.showerror("Hibás adat", "Az e-mail cím formátuma nem megfelelő!")
-                    return False
-            elif field_name == "kerdesek_szama" and not self._validate_question_number(str(field)):
-                return False
+    """
+    Collection of functions to validate the data entered by the user.
+    """
 
-        if missing_field_name:
-            messagebox.showerror("Hiányzó adat", f"Kérlek add meg a(z) {missing_field_name} mezőt!")
+    def __init__(self, controller: GeneratorInterface) -> None:
+        self.controller = controller
+        self.interface_language = self.controller.interface_language
+
+    def validate_class(self, class_: str) -> bool:
+        """Validates the class field."""
+        if class_ == self.interface_language["topic_page"]["class_stringvar"]:
+            self._show_missing_field_error(
+                self.interface_language["messagebox"]["missing_class_label"]
+            )
             return False
         return True
 
-    @staticmethod
-    def _validate_email(email: str) -> bool:
-        email_regex = re.compile(r"[^@]+@[^@]+\.[^@]+")
-        if not re.match(email_regex, email):
+    def validate_subject(self, subject: str) -> bool:
+        """Validates the subject field."""
+        if subject == self.interface_language["topic_page"]["subject_stringvar"]:
+            self._show_missing_field_error(
+                self.interface_language["messagebox"]["missing_subject_label"]
+            )
             return False
         return True
 
-    @staticmethod
-    def _validate_question_number(question_number: str) -> bool:
+    def validate_topic(self, topic: str) -> bool:
+        """Validates the topic field."""
+        if topic == self.interface_language["topic_page"]["topic_stringvar"]:
+            self._show_missing_field_error(
+                self.interface_language["messagebox"]["missing_topic_label"]
+            )
+            return False
+        return True
+
+    def validate_students(self, students: list[str]) -> bool:
+        """Validates the students field."""
+        if not students:
+            self._show_missing_field_error(
+                self.interface_language["messagebox"]["missing_students"]
+            )
+            return False
+        return True
+
+    def validate_date(self, date: str) -> bool:
+        """Validates the date field."""
+        if not date:
+            self._show_missing_field_error(
+                self.interface_language["messagebox"]["missing_date_label"]
+            )
+            return False
+        return True
+
+    def validate_question_number(self, question_number: str) -> bool:
+        """Validates that the number of questions is an integer between 1 and 20."""
+        if not question_number:
+            self._show_missing_field_error(
+                self.interface_language["messagebox"]["missing_question_number"]
+            )
+            return False
         try:
             int(question_number)
         except ValueError:
             messagebox.showerror("Hibás adat", "A kérdések száma csak egész szám lehet!")
             return False
+        # TODO: Check against the total number of questions instead of 20
         if not (1 <= int(question_number) <= 20):
             messagebox.showerror("Hibás adat", "A kérdések száma csak 1 és 20 közötti érték lehet!")
             return False
         return True
 
+    def _show_missing_field_error(self, missing_field_name: str) -> None:
+        """Shows an error message if a field is missing."""
+        messagebox.showerror(
+            title="Hiányzó adat",
+            message=f"Kérlek add meg a(z) {missing_field_name} mezőt!",
+        )
+
     def validate_student_number(self, student_number: str, available_students: list[str]) -> bool:
+        """Validates that the student number is an integer between 1 and the number of students."""
         if not self.validate_available_students(available_students):
             return False
         try:
@@ -598,7 +700,7 @@ class InterfaceValidation:
         except ValueError:
             messagebox.showerror("Hibás adat", "A sorsolt diák szám csak egész szám lehet!")
             return False
-        if not 1 <= student_number_int:
+        if student_number_int < 1 or student_number_int > len(available_students):
             messagebox.showerror(
                 "Hibás adat",
                 "A sorsolt diák szám csak 1 és az összes diák száma közötti érték lehet!",
@@ -608,12 +710,14 @@ class InterfaceValidation:
 
     @staticmethod
     def validate_available_students(available_students: list[str]) -> bool:
+        """Validates that the list of available students is not empty."""
         if not available_students:
             messagebox.showerror("Hiányzó adat", "Kérlek először add meg az osztály mezőt!")
             return False
         return True
 
     def validate_online_evaluator_connection(self) -> bool:
+        """Validates that the program can connect to the internet and the checkmark server."""
         if not self._validate_connection("http://google.com"):
             messagebox.showerror(
                 "Hálózati hiba",
@@ -632,8 +736,9 @@ class InterfaceValidation:
 
     @staticmethod
     def _validate_connection(url: str) -> bool:
+        """Validates that the program can connect to the given URL."""
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=5)
         except requests.exceptions.ConnectionError:
             return False
         if response.status_code != 200:

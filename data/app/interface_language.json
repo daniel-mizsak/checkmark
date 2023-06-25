@@ -1,0 +1,92 @@
+{
+    "generator": {
+        "ENG": {
+            "title": "Checkmark Generator",
+            "topic_page": {
+                "class_label": "Class",
+                "class_stringvar": "Select class",
+                "subject_label": "Subject",
+                "subject_stringvar": "Select subject",
+                "topic_label": "Topic",
+                "topic_stringvar": "Select topic"
+            },
+            "student_page": {
+                "student_number_label": "Chosen student number",
+                "select_random_students_button": "Chose!",
+                "select_students_button_all": "All",
+                "select_students_button_none": "None"
+            },
+            "question_page": {
+                "question_number_label": "Number of questions",
+                "random_question_order_label": "Random question order",
+                "random_option_order_label": "Random option order"
+            },
+            "data_page": {
+                "online_evaluator_label": "Create online evaluator",
+                "date_label": "Date"
+            },
+            "submit_page": {
+                "submit_button": "Submit",
+                "feedback_label": "Send feedback",
+                "send_feedback_email_subject": "Checkmark feedback"
+            },
+            "messagebox": {
+                "success_title": "Success",
+                "error_title": "Error",
+                "invalid_input_title": "Invalid input",
+                "success_message": "The assessments have been generated. Would you like to open the folder?",
+                "error_message": "An error occurred while generating the assessments:",
+                "missing_class_label": "class",
+                "missing_subject_label": "subject",
+                "missing_topic_label": "topic",
+                "missing_students": "students",
+                "missing_date_label": "date",
+                "missing_question_number": "question number"
+            }
+        },
+        "HUN": {
+            "title": "Checkmark Készítő",
+            "topic_page": {
+                "class_label": "Osztály",
+                "class_stringvar": "Osztály kiválasztása",
+                "subject_label": "Tantárgy",
+                "subject_stringvar": "Tantárgy kiválasztása",
+                "topic_label": "Témakör",
+                "topic_stringvar": "Témakör kiválasztása"
+            },
+            "student_page": {
+                "student_number_label": "Sorsolt diák szám",
+                "select_random_students_button": "Sorsolj!",
+                "select_students_button_all": "Összes",
+                "select_students_button_none": "Egyik sem"
+            },
+            "question_page": {
+                "question_number_label": "Kérdések száma",
+                "random_question_order_label": "Véletlenszerű kérdés sorrend",
+                "random_option_order_label": "Véletlenszerű opció sorrend"
+            },
+            "data_page": {
+                "online_evaluator_label": "Internetes javító létrehozása",
+                "date_label": "Dátum"
+            },
+            "submit_page": {
+                "submit_button": "Küldés",
+                "feedback_label": "Visszajelzés",
+                "send_feedback_email_subject": "Checkmark visszajelzés"
+            },
+            "messagebox": {
+                "success_title": "Siker",
+                "error_title": "Hiba",
+                "invalid_input_title": "Érvénytelen bemenet",
+                "success_message": "A dolgozatok elkészültek. Szeretnéd megnyitni a mappát?",
+                "error_message": "Hiba történt a dolgozatok elkészítése során:",
+                "missing_class_label": "osztály",
+                "missing_subject_label": "tantárgy",
+                "missing_topic_label": "témakör",
+                "missing_students": "tanulók",
+                "missing_date_label": "dátum",
+                "missing_question_number": "kérdések száma"
+            }
+        }
+    }
+}

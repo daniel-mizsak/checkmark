@@ -46,8 +46,8 @@ scripts.checkmark = "checkmark.main:main"
 [project.optional-dependencies]
 dev = [
     "black",
-    "coverage",
     "mypy",
+    "types-requests",
     "pre-commit",
     "pytest-cov",
     "sphinx",
@@ -99,7 +99,7 @@ line-length = 100
 
 
 # Tox
-# TODO: Add coverage and black
+# TODO: Add formatter (black), linter (ruff) and add other moduls to mypy
 [tool.tox]
 legacy_tox_ini = """
     [tox]
@@ -121,6 +121,8 @@ legacy_tox_ini = """
 
     [testenv:mypy]
     basepython = python3.11
-    deps = mypy
-    commands = mypy src tests
+    deps =
+        mypy
+        types-requests
+    commands = mypy src/checkmark/generator
 """
