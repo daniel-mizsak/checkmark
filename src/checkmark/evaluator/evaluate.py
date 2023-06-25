@@ -1,3 +1,4 @@
+from __future__ import annotations
 
 from pathlib import Path
 
@@ -29,7 +30,8 @@ def evaluate_assessment(
 
 
 def load_image(image_path: Path | Image.Image):
-    if isinstance(image_path, np.ndarray): return image_path
+    if isinstance(image_path, np.ndarray):
+        return image_path
     if image_path.suffix.lower() == ".heic":
         register_heif_opener()
 
@@ -128,14 +130,15 @@ def x_marks_the_spot(image, contours, correct_answers):
 
         ### debug ###
         for k, img in enumerate(warped_images):
-            cv2.imshow(f'img_{k}', img)
-        print(f'{threshold=}')
+            cv2.imshow(f"img_{k}", img)
+        print(f"{threshold=}")
         for k, ans in enumerate(given_answers, 1):
             if ans is None:
-                print('0', end=' ')
+                print("0", end=" ")
             else:
-                print('ABCD'[ans], end=' ')
-            if k % 5 == 0: print('')
+                print("ABCD"[ans], end=" ")
+            if k % 5 == 0:
+                print("")
         cv2.waitKey(0)
         cv2.destroyAllWindows()
         ### debug end ###
@@ -303,6 +306,3 @@ def get_inverse_warped_images(width, height, contours, image, corrected_images):
         cv2.addWeighted(warped_image, 1, image_final, 1, 0, image_final)
 
     return image_final
-
-
-
