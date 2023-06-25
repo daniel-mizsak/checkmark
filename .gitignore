@@ -1,7 +1,6 @@
 # Project
-data/app_data/checkmark.log
-data/app_data/data.json
-data/generated_documents/
+data/app/checkmark.log
+data/generated/
 
 # System
 .DS_Store

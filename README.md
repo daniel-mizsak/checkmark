@@ -3,10 +3,10 @@
 
 [![build status](https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yaml/badge.svg)](https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yaml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/daniel-mizsak/checkmark/main.svg)](https://results.pre-commit.ci/latest/github/daniel-mizsak/checkmark/main)
-[![license](https://img.shields.io/github/license/daniel-mizsak/check-mark)](https://img.shields.io/github/license/daniel-mizsak/check-mark)
+[![license](https://img.shields.io/github/license/daniel-mizsak/checkmark)](https://img.shields.io/github/license/daniel-mizsak/checkmark)
 
 
-Checkmark is an automated assessment creation and evaluation system.
+Checkmark is an automated assessment generator and evaluator system.
 
 It works with a predefined question pool and a list of students, and generates quizzes in a format that later can be automatically evaluated by taking a picture of the submission.
 
@@ -34,11 +34,14 @@ To run the application you need `python` installed on your computer.
 
 - Create and activate a new virtual environment in the root folder of the project ([how to use venv](https://docs.python.org/3/library/venv.html))
 
-- Install the necessary packages:
-    `pip install -r requirements.txt`
+- Install the code as a packages:
+    `pip install -e .`
+
+- Verify that the installation was successful:
+    `checkmark --version`
 
 - Run the GUI and generate some assessments:
-    `python run.py`
+    `checkmark --generator`
 </details>
 
 <br>

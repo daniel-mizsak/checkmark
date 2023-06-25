@@ -6,6 +6,7 @@ from checkmark.generator.generator_interface import GeneratorInterface
 
 
 def parse_arguments() -> argparse.Namespace:
+    """Parses command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--version",
@@ -14,13 +15,13 @@ def parse_arguments() -> argparse.Namespace:
         required=False,
     )
     parser.add_argument(
-        "--generator",
+        "--generate",
         action="store_true",
         help="Graphical User Interface for Assessment Generation",
         required=False,
     )
     parser.add_argument(
-        "--evaluator",
+        "--evaluate",
         action="store_true",
         help="Graphical User Interface for Assessment Evaluation",
         required=False,
@@ -30,17 +31,20 @@ def parse_arguments() -> argparse.Namespace:
     return args
 
 
-def main():
+def main() -> bool:
+    """Main function of the checkmark application."""
     args = parse_arguments()
 
     if args.version:
         print(f"Checkmark v{importlib.metadata.version('checkmark')}")
-        return 0
+        return True
 
-    if args.generator:
+    if args.generate:
         GeneratorInterface().mainloop()
-        return 0
+        return True
 
-    if args.evaluator:
+    if args.evaluate:
         EvaluatorInterface().mainloop()
-        return 0
+        return True
+
+    return False

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import base64
-import json
 import os
 import random
 import sys
+from dataclasses import dataclass
 
 import qrcode
 from cryptography.fernet import Fernet
@@ -17,52 +17,34 @@ from PIL import Image
 from checkmark.generator.question import Question
 
 
-def create_pdf(
-    student: str,
-    class_: str,
-    subject_: str,
-    topic_: str,
-    date: str,
-    questions: list[Question],
-    pocket_id: str,
-) -> None:
-    """Generates and saves a PDF document with the given data under data/generated_documents.
+@dataclass
+class PDFData:
+    """Data necessary for the checkmark PDF generation."""
 
-    Args:
-        student (str): Name of the student. E.g.: "John Doe".
-        class_ (str): Number and letter of the class. E.g.: "9-a" or "12-B".
-        subject_ (str): Name of the subject. E.g.: "Mathematics" or "History".
-        topic_ (str): Name of the topic. E.g.: "Algebra" or "The French Revolution".
-        date (str): Date of the assessment. E.g.: "2021.09.20.".
-        questions (list[Question]): List of Question objects.
-        pocket_id (str): ID of the pocket under which the assessment is stored.
-    """
-    pdf = PDF(student, class_, subject_, topic_, date, questions, pocket_id)
+    student: str
+    class_: str
+    subject: str
+    topic: str
+    date: str
+    questions: list[Question]
+    pocket_id: str
+    pocket_password: str
+
+
+def create_pdf(pdf_data: PDFData) -> PDF:
+    """Creates a PDF document from the given data."""
+    pdf = PDF(pdf_data)
     pdf.add_page()
     pdf.add_questions()
     pdf.add_page()
     pdf.add_checkmark_boxes()
-
-    pdf_path = f"data/generated_documents/{date}_{subject_}"
-    os.makedirs(pdf_path, exist_ok=True)
-    pdf_name = f"{pdf_path}/{topic_.replace('.', '')}_{student}.pdf".replace(" ", "_")
-
-    pdf.output(pdf_name)
+    return pdf
 
 
 class PDF(FPDF):
-    def __init__(
-        self,
-        student: str,
-        class_: str,
-        subject_: str,
-        topic_: str,
-        date: str,
-        questions: list[Question],
-        pocket_id: str,
-        *args: str,
-        **kwargs: str,
-    ) -> None:
+    """PDF class for generating the checkmark PDF document."""
+
+    def __init__(self, pdf_data, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.alias_nb_pages()
         self.set_auto_page_break(auto=False)
@@ -70,7 +52,7 @@ class PDF(FPDF):
         self.margin = 15
         self.set_margin(self.margin)
 
-        font_path = f"{os.getcwd()}/data/app_data/FreeSans.ttf"
+        font_path = f"{os.getcwd()}/data/app/FreeSans.ttf"
         self.add_font(fname=font_path, family="FreeSans")
         self.font = "FreeSans"
         self.title_font_size = 20
@@ -78,17 +60,19 @@ class PDF(FPDF):
         self.option_font_size = 12
         self.footer_font_size = 8
 
-        self.student = student
-        self.class_ = class_
-        self.subject_ = subject_
-        self.topic_ = topic_
-        self.date = date
-        self.questions = questions
-        self.question_number = 0
+        self.student = pdf_data.student
+        self.class_ = pdf_data.class_
+        self.subject = pdf_data.subject
+        self.topic = pdf_data.topic
+        self.date = pdf_data.date
+        self.questions = pdf_data.questions
+        self.pocket_id = pdf_data.pocket_id
+        self.pocket_password = pdf_data.pocket_password
 
+        self.question_number = 0
         self.last_page = False
-        self.qr_pocket = create_pocket_qr_image(pocket_id)
-        self.qr_solution = create_solution_qr_image(student, date, questions)
+        self.qr_pocket = self.create_pocket_qr_image()
+        self.qr_solution = self.create_solution_qr_image()
 
     def header(self) -> None:
         self.set_font(self.font, "", self.title_font_size)
@@ -98,7 +82,7 @@ class PDF(FPDF):
             assessment_data = [
                 ["Név:", self.student],
                 ["Osztály:", self.class_],
-                ["Tantárgy:", self.subject_],
+                ["Tantárgy:", self.subject],
             ]
 
             for row in assessment_data:
@@ -108,7 +92,7 @@ class PDF(FPDF):
                 self.ln(10)
             self.ln(5)
 
-            topic_text = f"{self.topic_}"
+            topic_text = f"{self.topic}"
             self.multi_cell(
                 self.w * 0.7, 10, topic_text, align="L", new_x=XPos.LMARGIN, new_y=YPos.NEXT
             )
@@ -258,30 +242,26 @@ class PDF(FPDF):
 
             self.ln(15)
 
+    def create_solution_qr_image(self) -> Image.Image:
+        question_data = " ".join([str(question.index) for question in self.questions])
+        correct_data = " ".join([str(question.correct) for question in self.questions])
+        assessment_data = "; ".join([self.student, self.date, question_data, correct_data])
 
-def create_solution_qr_image(student: str, date: str, questions: list[Question]) -> Image.Image:
-    question_data = " ".join([str(question.index) for question in questions])
-    correct_data = " ".join([str(question.correct) for question in questions])
-    assessment_data = "; ".join([student, date, question_data, correct_data])
+        random.seed(0)
+        salt = random.getrandbits(128).to_bytes(16, sys.byteorder)
+        kdf = PBKDF2HMAC(algorithm=SHA256(), length=32, salt=salt, iterations=1)
+        key = base64.urlsafe_b64encode(kdf.derive(self.pocket_password.encode()))
 
-    with open("data/app_data/data.json", "r", encoding="utf-8") as f:
-        password = json.loads(f.read())["password"]
-    random.seed(0)
-    salt = random.getrandbits(128).to_bytes(16, sys.byteorder)
-    kdf = PBKDF2HMAC(algorithm=SHA256(), length=32, salt=salt, iterations=1)
-    key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        fernet = Fernet(key)
+        token = fernet.encrypt(assessment_data.encode("utf-8"))
+        qr_image = qrcode.make(token)
+        qr_image = qr_image.convert("RGB")
+        return qr_image
 
-    fernet = Fernet(key)
-    token = fernet.encrypt(assessment_data.encode("utf-8"))
-    qr_image = qrcode.make(token)
-    qr_image = qr_image.convert("RGB")
-    return qr_image
-
-
-def create_pocket_qr_image(pocket_id: str) -> Image.Image:
-    if not pocket_id:
-        return Image.new("RGB", (1, 1), color="white")
-    pocket_url = f"https://pythonvilag.hu/checkmark/pocket/{pocket_id}/"
-    qr_image = qrcode.make(pocket_url)
-    qr_image = qr_image.convert("RGB")
-    return qr_image
+    def create_pocket_qr_image(self) -> Image.Image:
+        if not self.pocket_id:
+            return Image.new("RGB", (1, 1), color="white")
+        pocket_url = f"https://pythonvilag.hu/checkmark/pocket/{self.pocket_id}/"
+        qr_image = qrcode.make(pocket_url)
+        qr_image = qr_image.convert("RGB")
+        return qr_image
