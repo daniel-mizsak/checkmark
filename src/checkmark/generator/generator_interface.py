@@ -19,6 +19,7 @@ from checkmark.generator.generate import generate_assessment
 class GeneratorInterface(tk.Tk):
     def __init__(self) -> None:
         tk.Tk.__init__(self)
+        self.iconphoto(True, tk.PhotoImage(file="data/app/icon_g.png"))
         window_width = 680
         window_height = 440
 

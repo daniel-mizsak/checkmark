@@ -1,30 +1,33 @@
-import json
-import os
-import random
-import re
-import subprocess
-import sys
-import tkinter as tk
-import webbrowser
-from tkinter import messagebox
+"""
+Graphical User Interface for evaluating the images of the assessments generated with Checkmark.
 
-import requests
+@author "Dániel Lajos Mizsák" <info@pythonvilag.hu>
+"""
+
+from __future__ import annotations
+
+import tkinter as tk
+
 import ttkbootstrap as ttk
 from ttkbootstrap import Style
-from ttkbootstrap.constants import INFO, OUTLINE
-
-from checkmark.evaluator.evaluate import evaluate_assessment
 
 
 class EvaluatorInterface(tk.Tk):
+    """
+    Graphical User Interface for assessment evaluation.
+    """
+
     def __init__(self) -> None:
+        # TODO: Support multiple languages
         tk.Tk.__init__(self)
+        self.iconphoto(True, tk.PhotoImage(file="data/app/icon_e.png"))
         window_width = 680
         window_height = 440
+        top_left_x = (self.winfo_screenwidth() - window_width) // 2
+        top_left_y = (self.winfo_screenheight() - window_height) // 2
 
-        # TODO: Add icon
         self.wm_title("Checkmark Evaluator")
-        self.wm_geometry(f"{window_width}x{window_height}+200+200")
+        self.wm_geometry(f"{window_width}x{window_height}+{top_left_x}+{top_left_y}")
         self.wm_resizable(False, False)
         self.style = Style(theme="superhero")
 
