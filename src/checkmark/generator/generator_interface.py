@@ -1,7 +1,7 @@
 """
 Graphical User Interface that aggregates necessary information for assessment generation.
 
-@author "Dániel Lajos Mizsák" <info@pythonvilag.hu>
+@author "Daniel Mizsak" <info@pythonvilag.hu>
 """
 
 from __future__ import annotations
@@ -30,8 +30,8 @@ class GeneratorInterface(tk.Tk):
     def __init__(self) -> None:
         # TODO: Support multiple languages
         tk.Tk.__init__(self)
-        with open("data/app/interface_language.json", "r", encoding="utf-8") as f:
-            self.interface_language = json.load(f)["generator"]["ENG"]
+        with open("data/app/interface_language.json", "r", encoding="utf-8") as file_handle:
+            self.interface_language = json.load(file_handle)["generator"]["ENG"]
 
         self.iconphoto(True, tk.PhotoImage(file="data/app/icon_g.png"))
         self.wm_title(self.interface_language["title"])
@@ -344,11 +344,9 @@ class StudentPage(tk.Frame):
         """Updates the student listbox with the available students from the selected class."""
         class_selected = self.controller.topic_page.class_stringvar.get()
         with open(
-            file=f"data/classes/{class_selected}.csv",
-            mode="r",
-            encoding="utf-8",
-        ) as f:
-            self.available_students = f.readline().strip().split(", ")
+            file=f"data/classes/{class_selected}.csv", mode="r", encoding="utf-8"
+        ) as file_handle:
+            self.available_students = file_handle.readline().strip().split(", ")
 
         self.student_listbox.delete(0, tk.END)
         for available_student in self.available_students:

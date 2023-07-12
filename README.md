@@ -1,4 +1,4 @@
-## <div align="center"> ✅ Checkmark</div>
+## <div align="center"> ✅ checkmark</div>
 <br>
 
 [![build status](https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yaml/badge.svg)](https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yaml)
@@ -70,6 +70,6 @@ The following features are planned to be implemented in the future:
 
 ## <div align="center"> Contribute</div>
 
-[Mizsák Dániel](https://www.linkedin.com/in/daniel-mizsak)
+[Daniel Mizsak](https://www.linkedin.com/in/daniel-mizsak)
 
-[Pecsenye Samu](https://www.linkedin.com/in/samu-pecsenye/)
+[Samu Pecsenye](https://www.linkedin.com/in/samu-pecsenye/)

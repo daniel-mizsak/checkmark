@@ -1,7 +1,7 @@
 """
 Assessment generating and logging functionalities.
 
-@author "Dániel Lajos Mizsák" <info@pythonvilag.hu>
+@author "Daniel Mizsak" <info@pythonvilag.hu>
 """
 
 from __future__ import annotations
@@ -68,8 +68,8 @@ def generate_assessment(checkmark_fields: CheckmarkFields) -> bool:
     all_questions = read_questions_from_excel(questions_path)
 
     pocket_data = generate_pocket_data(checkmark_fields.students, checkmark_fields.date)
-    with open(f"{pdf_path}/pocket_data.json", "w", encoding="utf-8") as f:
-        json.dump(asdict(pocket_data), f, indent=4, ensure_ascii=False)
+    with open(f"{pdf_path}/pocket_data.json", "w", encoding="utf-8") as file_handle:
+        json.dump(asdict(pocket_data), file_handle, indent=4, ensure_ascii=False)
 
     if checkmark_fields.online_evaluator:
         if not send_pocket_data(pocket_data):
@@ -117,7 +117,7 @@ def setup_logger(logger_name: str) -> logging.Logger:
     Returns:
         logging.Logger: _description_
     """
-    log_path = f"data/app/"
+    log_path = "data/app/"
     os.makedirs(log_path, exist_ok=True)
 
     logger = logging.getLogger(logger_name)

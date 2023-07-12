@@ -17,8 +17,8 @@ def decode_solution_data(
     qr_img: Image.Image, password: str | None = None
 ) -> tuple[str, str, list[int], list[int]]:
     if password is None:
-        with open("data/app_data/data.json", "r", encoding="utf-8") as f:
-            password = json.loads(f.read())["password"]
+        with open("data/app_data/data.json", "r", encoding="utf-8") as file_handle:
+            password = json.loads(file_handle.read())["password"]
     random.seed(0)
     salt = random.getrandbits(128).to_bytes(16, sys.byteorder)
     kdf = PBKDF2HMAC(algorithm=SHA256(), length=32, salt=salt, iterations=1)

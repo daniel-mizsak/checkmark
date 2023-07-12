@@ -1,6 +1,7 @@
 # Build System
 [build-system]
-requires = ["setuptools"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 # Project Metadata
 [project]
@@ -24,6 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Education",
 ]
+scripts.checkmark = "checkmark.main:main"
 dependencies = [
     # Generator
     "cryptography==40.0.2",
@@ -41,32 +43,31 @@ dependencies = [
     #Server
     "Flask==2.3.2",
 ]
-scripts.checkmark = "checkmark.main:main"
-
 [project.optional-dependencies]
 dev = [
     "black",
+    "furo",
     "mypy",
-    "types-requests",
     "pre-commit",
     "pytest-cov",
-    "sphinx",
     "pytest",
     "ruff",
+    "sphinx-copybutton",
+    "sphinx",
+    "tox",
+    "types-requests",
 ]
-
 [project.urls]
 Repository = "https://github.com/daniel-mizsak/checkmark"
 Homepage = "https://pythonvilag.hu/pv/projects/checkmark"
 
 # Tools
-# Setup Tools
-[tool.setuptools.packages.find]
-where = ["src"]
-
 # Black
 [tool.black]
 line-length = 100
+
+# Hatch
+[tool.hatch]
 
 # MyPy
 [tool.mypy]
@@ -96,7 +97,6 @@ filterwarnings = ["ignore::DeprecationWarning"]
 # Ruff
 [tool.ruff]
 line-length = 100
-
 
 # Tox
 # TODO: Add formatter (black), linter (ruff) and add other moduls to mypy

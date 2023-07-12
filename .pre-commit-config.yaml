@@ -1,7 +1,7 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
-# exclude: ''
+exclude: 'src/checkmark/evaluator/*|src/checkmark/server/*'
 
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -17,20 +17,33 @@ repos:
     -   id: name-tests-test
     -   id: trailing-whitespace
 
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.3.0
-    hooks:
-    -   id: mypy
-        additional_dependencies: ['types-requests']
-
 -   repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 23.7.0
     hooks:
     -   id: black
         args: [--line-length=100]
+
+-   repo: https://github.com/adamchainz/blacken-docs
+    rev: 1.15.0
+    hooks:
+    -   id: blacken-docs
+        additional_dependencies:
+        - black==23.3.0
 
 -   repo: https://github.com/PyCQA/isort
     rev: 5.12.0
     hooks:
     -   id: isort
         args: [--profile=black]
+
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.4.1
+    hooks:
+    -   id: mypy
+        additional_dependencies: ['types-requests']
+
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.277
+    hooks:
+    -   id: ruff
+        args: [ --fix, --exit-non-zero-on-fix ]

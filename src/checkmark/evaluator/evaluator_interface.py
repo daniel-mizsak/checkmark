@@ -1,14 +1,13 @@
 """
 Graphical User Interface for evaluating the images of the assessments generated with Checkmark.
 
-@author "Dániel Lajos Mizsák" <info@pythonvilag.hu>
+@author "Daniel Mizsak" <info@pythonvilag.hu>
 """
 
 from __future__ import annotations
 
 import tkinter as tk
 
-import ttkbootstrap as ttk
 from ttkbootstrap import Style
 
 

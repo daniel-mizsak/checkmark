@@ -34,8 +34,8 @@ def create_pocket() -> Response:
             f"pythonvilag_website/static/checkmark/{pocket_data['pocket_id']}",
         )
         os.makedirs(folder_path, exist_ok=True)
-        with open(f"{folder_path}/pocket_data.json", "w", encoding="utf-8") as f:
-            json.dump(pocket_data, f, indent=4, ensure_ascii=False)
+        with open(f"{folder_path}/pocket_data.json", "w", encoding="utf-8") as file_handle:
+            json.dump(pocket_data, file_handle, indent=4, ensure_ascii=False)
 
     return make_response("Success", 200)
 
@@ -47,8 +47,8 @@ def upload_file(pocket_id):
     if pocket_id not in available_pockets:
         return abort(404)
 
-    with open(f"{folder_path}/{pocket_id}/pocket_data.json", "r", encoding="utf-8") as f:
-        pocket_data = json.load(f)
+    with open(f"{folder_path}/{pocket_id}/pocket_data.json", "r", encoding="utf-8") as file_handle:
+        pocket_data = json.load(file_handle)
 
     if request.method != "POST":
         return render_template(
@@ -101,8 +101,8 @@ def pocket_results(pocket_id, pocket_password):
     if pocket_id not in available_pockets:
         return abort(404)
 
-    with open(f"{folder_path}/{pocket_id}/pocket_data.json", "r", encoding="utf-8") as f:
-        pocket_data = json.load(f)
+    with open(f"{folder_path}/{pocket_id}/pocket_data.json", "r", encoding="utf-8") as file_handle:
+        pocket_data = json.load(file_handle)
 
     if pocket_password != pocket_data["pocket_password"]:
         return abort(403)
