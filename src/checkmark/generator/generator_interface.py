@@ -27,13 +27,13 @@ class GeneratorInterface(tk.Tk):
     Graphical User Interface for assessment generation.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, interface_language: str = "HUN") -> None:
         # TODO: Support multiple languages
         tk.Tk.__init__(self)
         with open("data/app/interface_language.json", "r", encoding="utf-8") as file_handle:
-            self.interface_language = json.load(file_handle)["generator"]["ENG"]
+            self.interface_language = json.load(file_handle)["generator"][interface_language]
 
-        self.iconphoto(True, tk.PhotoImage(file="data/app/icon_g.png"))
+        # self.iconphoto(True, tk.PhotoImage(file="data/app/icon_g.png"))
         self.wm_title(self.interface_language["title"])
         window_width = 680
         window_height = 440
@@ -578,6 +578,7 @@ class SubmitPage(tk.Frame):
             open_folder = messagebox.askquestion(
                 title="Siker!",
                 message="A dolgozatok elkészültek. Szeretnéd megnyitni a mappát?",
+                icon="question",
             )
             if open_folder == "yes":
                 # Changing askquestion message box button text is a lot of extra effort.
@@ -590,6 +591,7 @@ class SubmitPage(tk.Frame):
             messagebox.showerror(
                 title="Hiba!",
                 message=f"Hiba történt a dolgozatok elkészítése során:\n{exception}",
+                icon="error",
             )
 
     @staticmethod
@@ -674,11 +676,19 @@ class InterfaceValidation:
         try:
             int(question_number)
         except ValueError:
-            messagebox.showerror("Hibás adat", "A kérdések száma csak egész szám lehet!")
+            messagebox.showerror(
+                title="Hibás adat",
+                message="A kérdések száma csak egész szám lehet!",
+                icon="error",
+            )
             return False
         # TODO: Check against the total number of questions instead of 20
         if not (1 <= int(question_number) <= 20):
-            messagebox.showerror("Hibás adat", "A kérdések száma csak 1 és 20 közötti érték lehet!")
+            messagebox.showerror(
+                title="Hibás adat",
+                message="A kérdések száma csak 1 és 20 közötti érték lehet!",
+                icon="error",
+            )
             return False
         return True
 
@@ -687,6 +697,7 @@ class InterfaceValidation:
         messagebox.showerror(
             title="Hiányzó adat",
             message=f"Kérlek add meg a(z) {missing_field_name} mezőt!",
+            icon="error",
         )
 
     def validate_student_number(self, student_number: str, available_students: list[str]) -> bool:
@@ -696,12 +707,17 @@ class InterfaceValidation:
         try:
             student_number_int = int(student_number)
         except ValueError:
-            messagebox.showerror("Hibás adat", "A sorsolt diák szám csak egész szám lehet!")
+            messagebox.showerror(
+                title="Hibás adat",
+                message="A sorsolt diák szám csak egész szám lehet!",
+                icon="error",
+            )
             return False
         if student_number_int < 1 or student_number_int > len(available_students):
             messagebox.showerror(
-                "Hibás adat",
-                "A sorsolt diák szám csak 1 és az összes diák száma közötti érték lehet!",
+                title="Hibás adat",
+                message="A sorsolt diák szám csak 1 és az összes diák száma közötti érték lehet!",
+                icon="error",
             )
             return False
         return True
@@ -710,7 +726,11 @@ class InterfaceValidation:
     def validate_available_students(available_students: list[str]) -> bool:
         """Validates that the list of available students is not empty."""
         if not available_students:
-            messagebox.showerror("Hiányzó adat", "Kérlek először add meg az osztály mezőt!")
+            messagebox.showerror(
+                title="Hiányzó adat",
+                message="Kérlek először add meg az osztály mezőt!",
+                icon="error",
+            )
             return False
         return True
 
@@ -718,16 +738,18 @@ class InterfaceValidation:
         """Validates that the program can connect to the internet and the checkmark server."""
         if not self._validate_connection("http://google.com"):
             messagebox.showerror(
-                "Hálózati hiba",
-                "Nem sikerült csatlakozni az internethez.",
+                title="Hálózati hiba",
+                message="Nem sikerült csatlakozni az internethez.",
+                icon="error",
             )
             return False
 
-        if not self._validate_connection("http://127.0.0.1:5000/checkmark/create-pocket/"):
+        if not self._validate_connection("http://127.0.0.1:5000/checkmark/register-pocket/"):
             # TODO: Update URL to final address
             messagebox.showerror(
-                "Hálózati hiba",
-                "Nem sikerült csatlakozni a szerverhez.",
+                title="Hálózati hiba",
+                message="Nem sikerült csatlakozni a szerverhez.",
+                icon="error",
             )
             return False
         return True

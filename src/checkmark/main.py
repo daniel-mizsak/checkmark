@@ -1,3 +1,9 @@
+"""
+Main module of the checkmark application.
+
+@author "Daniel Mizsak" <info@pythonvilag.hu>
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -16,18 +22,22 @@ def parse_arguments() -> argparse.Namespace:
         help="Version",
         required=False,
     )
-    parser.add_argument(
-        "--generate",
-        action="store_true",
-        help="Graphical User Interface for Assessment Generation",
-        required=False,
+
+    subparsers = parser.add_subparsers(title="Commands", dest="command")
+
+    generate_parser = subparsers.add_parser(
+        "generate", help="Graphical User Interface for Assessment Generation"
     )
-    parser.add_argument(
-        "--evaluate",
-        action="store_true",
-        help="Graphical User Interface for Assessment Evaluation",
+    generate_parser.add_argument(
+        "--language",
+        type=str,
+        help="Interface language",
         required=False,
+        default="HUN",
+        choices=["HUN", "ENG"],
     )
+
+    subparsers.add_parser("evaluate", help="Graphical User Interface for Assessment Evaluation")
 
     args = parser.parse_args()
     return args
@@ -41,11 +51,15 @@ def main() -> bool:
         print(f"Checkmark v{importlib.metadata.version('checkmark')}")
         return True
 
-    if args.generate:
-        GeneratorInterface().mainloop()
+    if args.command is None:
+        print("No command given. Use --help for more information.")
+        return False
+
+    if args.command == "generate":
+        GeneratorInterface(args.language).mainloop()
         return True
 
-    if args.evaluate:
+    if args.command == "evaluate":
         EvaluatorInterface().mainloop()
         return True
 
