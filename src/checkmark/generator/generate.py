@@ -23,7 +23,7 @@ from checkmark.generator.question import read_questions_from_excel, select_quest
 
 @dataclass
 class CheckmarkFields:
-    """Data necessary data for the checkmark generator. These fields are given in the GUI."""
+    """Data for the checkmark generator. These fields are loaded in the GUI."""
 
     class_: str
     subject: str
@@ -38,7 +38,7 @@ class CheckmarkFields:
 
 @dataclass
 class PocketData:
-    """Data necessary for the checkmark online evaluation pocket. This info is sent to the server"""
+    """Data for the online evaluation pocket. This info is sent to the server"""
 
     students: list[str]
     date: str
@@ -47,7 +47,7 @@ class PocketData:
 
 
 def generate_assessment(checkmark_fields: CheckmarkFields) -> bool:
-    """Generates, saves and logs assessments.
+    """Manages and logs assessment generation.
 
     Args:
         checkmark_fields (CheckmarkFields): Data necessary for checkmark generator.
@@ -58,7 +58,7 @@ def generate_assessment(checkmark_fields: CheckmarkFields) -> bool:
     logger = setup_logger(__name__)
     pdf_path = (
         "data/generated/"
-        + f"{checkmark_fields.date}_{checkmark_fields.subject}_{checkmark_fields.class_}"
+        f"{checkmark_fields.date}_{checkmark_fields.subject}_{checkmark_fields.class_}"
     )
     os.makedirs(pdf_path, exist_ok=True)
 
@@ -166,15 +166,14 @@ def generate_pocket_data(students: list[str], date: str) -> PocketData:
     return pocket_data
 
 
-def send_pocket_data(pocket_data: PocketData) -> bool:
+def send_pocket_data(
+    pocket_data: PocketData,
+    target_url: str = "http://127.0.0.1:5000/checkmark/register-pocket/",  # TODO: Change URL
+) -> bool:
     """Send pocket data to the server."""
     data_json = json.dumps(asdict(pocket_data))
     try:
-        response = requests.post(
-            "http://127.0.0.1:5000/checkmark/create-pocket/",
-            json=data_json,
-            timeout=5,
-        ).json()
+        response = requests.post(url=target_url, json=data_json, timeout=5).json()
         if response.status_code != 200:
             return False
     except requests.exceptions.ConnectionError:

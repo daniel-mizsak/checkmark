@@ -1,3 +1,9 @@
+"""
+Assessment evaluation functionalities.
+
+@author "Samu Pecsenye" <samu.pecsenye@gmail.com>
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -1,3 +1,9 @@
+"""
+Server side route and evaluation management.
+
+@author "Daniel Mizsak" <info@pythonvilag.hu>
+"""
+
 from __future__ import annotations
 
 import json
@@ -22,8 +28,8 @@ from checkmark.evaluator.evaluate import evaluate_assessment
 checkmark_page = Blueprint("checkmark_page", __name__, template_folder="templates")
 
 
-@checkmark_page.route("/create-pocket/", methods=["GET", "POST"])
-def create_pocket() -> Response:
+@checkmark_page.route("/register-pocket/", methods=["GET", "POST"])
+def register_pocket() -> Response:
     """Save pocket data on the server side in a json file."""
     if request.method == "POST":
         jsondata = str(request.get_json())
@@ -68,6 +74,7 @@ def upload_file(pocket_id):
     file.save(file_path)
 
     result = evaluate_assessment(file_path, pocket_data["pocket_password"])
+    # TODO: Figure out final result structure
     pocket.results[student] = result
 
     corrected_image_path = file_path.with_name(file_path.stem + "_corrected" + file_path.suffix)
