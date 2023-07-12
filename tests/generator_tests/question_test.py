@@ -18,7 +18,10 @@ def test_read_questions_from_excel(temp_excel_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    "random_questions, random_option_order, expected_questions, expected_option_order_for_first_question",
+    "random_questions, "
+    "random_option_order, "
+    "expected_questions, "
+    "expected_option_order_for_first_question",
     [
         (False, False, [1, 2, 3], ["A1", "B1", "C1", "D1"]),
         (False, True, [1, 2, 3], ["C1", "A1", "B1", "D1"]),

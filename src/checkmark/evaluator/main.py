@@ -13,8 +13,9 @@ def main(image_path, password=None):
     score, result_image = evaluate_assessment(image, correct_data)
     return student, date, score, result_image
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     image_path = Path("data/uploads/hi2.jpg")
     student, date, score, result_image = main(image_path)
-    cv2.imshow('result image', result_image)
-    cv2.waitKey(0)    cv2.waitKey(0)
+    cv2.imshow("result image", result_image)
+    cv2.waitKey(0)

@@ -53,7 +53,12 @@ class Question:
         """
         Returns a string representation of the question.
         """
-        return f"Question(index={self.index}, body={self.body}, options={self.options}, correct={self.correct})"
+        return (
+            f"Question(index={self.index}, "
+            f"body={self.body}, "
+            f"options={self.options}, "
+            f"correct={self.correct})"
+        )
 
 
 def read_questions_from_excel(path: str) -> list[Question]:

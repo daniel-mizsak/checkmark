@@ -8,7 +8,7 @@ import pytest
 
 @pytest.fixture(scope="session")
 def temp_excel_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    excel_path = tmp_path_factory.mktemp("data")
+    excel_path = Path(tmp_path_factory.mktemp("data"))
     df_correct = pd.DataFrame(
         {
             "Feladat sorszám": [1, 2, 3],

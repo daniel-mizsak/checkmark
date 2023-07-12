@@ -183,7 +183,7 @@ class PDF(FPDF):
         rectangle_width = column_width * 4
         rectangle_height = 5 * circle_diameter + 4 * column_gap
 
-        original_x = self.get_x()
+        self.get_x()
         original_y = self.get_y()
 
         # TODO: Fix duplicate code
