@@ -27,7 +27,7 @@ classifiers = [
 scripts.checkmark = "checkmark.main:main"
 dependencies = [
     # Generator
-    "cryptography==41.0.2",
+    "cryptography==41.0.3",
     "fpdf2==2.5.7",
     "matplotlib==3.6.3",
     "openpyxl==3.0.10",
