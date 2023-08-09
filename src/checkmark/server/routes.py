@@ -47,7 +47,8 @@ def register_pocket() -> Response:
 
 
 @checkmark_page.route("/pocket/<pocket_id>/", methods=["GET", "POST"])
-def upload_file(pocket_id):
+def upload_file(pocket_id: str) -> str | Response:
+    """Upload assessment to the server and evaluate it."""
     folder_path = os.path.join(sys.path[0], "pythonvilag_website/static/checkmark")
     available_pockets = os.listdir(folder_path)
     if pocket_id not in available_pockets:

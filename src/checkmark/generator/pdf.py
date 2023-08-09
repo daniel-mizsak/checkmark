@@ -1,3 +1,10 @@
+"""
+Code to generate the PDF document.
+Underlying library: https://github.com/PyFPDF/fpdf2
+
+@author "Daniel Mizsak" <info@pythonvilag.hu>
+"""
+
 from __future__ import annotations
 
 import base64
@@ -139,6 +146,7 @@ class PDF(FPDF):
         self.cell(0, 0, date_text, align="R", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
     def add_questions(self) -> None:
+        """Displays the selected questions and options."""
         # TODO: Cell overflow is still not working due to changing text character width
         cell_width = (self.w - 2 * self.margin) / 4
         for question in self.questions:
@@ -171,6 +179,7 @@ class PDF(FPDF):
         self.last_page = True
 
     def add_checkmark_boxes(self) -> None:
+        """Displays the boxes at the last page, where the answers are selected."""
         # TODO: Give circles equal spaces from the borders
         number_of_blocks = ((len(self.questions) - 1) // 5) + 1
 
@@ -243,6 +252,7 @@ class PDF(FPDF):
             self.ln(15)
 
     def create_solution_qr_image(self) -> Image.Image:
+        """Encodes the necessary information into a string and creates a QR code from it."""
         question_data = " ".join([str(question.index) for question in self.questions])
         correct_data = " ".join([str(question.correct) for question in self.questions])
         assessment_data = "; ".join([self.student, self.date, question_data, correct_data])
@@ -259,6 +269,7 @@ class PDF(FPDF):
         return qr_image
 
     def create_pocket_qr_image(self) -> Image.Image:
+        """Creates a QR code pointing to the webpage where the assessment can be uploaded."""
         if not self.pocket_id:
             return Image.new("RGB", (1, 1), color="white")
         pocket_url = f"https://pythonvilag.hu/checkmark/pocket/{self.pocket_id}/"

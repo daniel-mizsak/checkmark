@@ -5,11 +5,11 @@ build-backend = "hatchling.build"
 
 # Project Metadata
 [project]
-name = "checkmark"
+name = "checkmark_python"
 version = "0.1.0"
 description = "A tool to automatically create and evaluate assessments."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 license = { file = "LICENSE" }
 authors = [
     { name = "Daniel Mizsak", email = "info@pythonvilag.hu" },
@@ -19,6 +19,7 @@ keywords = ["assessment", "evaluation", "automatic", "checkmark"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -102,12 +103,12 @@ line-length = 100
 [tool.tox]
 legacy_tox_ini = """
     [tox]
-    envlist = py39,py311,mypy
+    envlist = py38,py311,mypy
     skip-missing-interpreters = true
 
     [gh]
     python =
-        3.9 = py39
+        3.8 = py38
         3.11 = py311, mypy
 
     [testenv]
