@@ -1,6 +1,7 @@
 """
 Code to generate the PDF document.
-Underlying library: https://github.com/PyFPDF/fpdf2
+
+Underlying library: https://github.com/PyFPDF/fpdf2.
 
 @author "Daniel Mizsak" <info@pythonvilag.hu>
 """
@@ -8,10 +9,11 @@ Underlying library: https://github.com/PyFPDF/fpdf2
 from __future__ import annotations
 
 import base64
-import os
 import random
 import sys
 from dataclasses import dataclass
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import qrcode
 from cryptography.fernet import Fernet
@@ -21,7 +23,8 @@ from fpdf import FPDF
 from fpdf.enums import XPos, YPos
 from PIL import Image
 
-from checkmark.generator.question import Question
+if TYPE_CHECKING:
+    from checkmark.generator.question import Question
 
 
 @dataclass
@@ -51,7 +54,18 @@ def create_pdf(pdf_data: PDFData) -> PDF:
 class PDF(FPDF):
     """PDF class for generating the checkmark PDF document."""
 
-    def __init__(self, pdf_data, *args, **kwargs):
+    def __init__(  # type: ignore [no-untyped-def]  # noqa: D417
+        self: PDF,
+        pdf_data: PDFData,
+        *args,  # noqa: ANN002
+        **kwargs,  # noqa: ANN003
+    ) -> None:
+        """Initializes the PDF document.
+
+        Args:
+            self (PDF): The PDF object.
+            pdf_data (PDFData): The data necessary for the PDF generation.
+        """
         super().__init__(*args, **kwargs)
         self.alias_nb_pages()
         self.set_auto_page_break(auto=False)
@@ -59,7 +73,7 @@ class PDF(FPDF):
         self.margin = 15
         self.set_margin(self.margin)
 
-        font_path = f"{os.getcwd()}/data/app/FreeSans.ttf"
+        font_path = f"{Path.cwd()}/data/app/FreeSans.ttf"
         self.add_font(fname=font_path, family="FreeSans")
         self.font = "FreeSans"
         self.title_font_size = 20
@@ -81,7 +95,8 @@ class PDF(FPDF):
         self.qr_pocket = self.create_pocket_qr_image()
         self.qr_solution = self.create_solution_qr_image()
 
-    def header(self) -> None:
+    def header(self: PDF) -> None:
+        """Displays the header of the document."""
         self.set_font(self.font, "", self.title_font_size)
         self.ln(5)
 
@@ -100,9 +115,7 @@ class PDF(FPDF):
             self.ln(5)
 
             topic_text = f"{self.topic}"
-            self.multi_cell(
-                self.w * 0.7, 10, topic_text, align="L", new_x=XPos.LMARGIN, new_y=YPos.NEXT
-            )
+            self.multi_cell(self.w * 0.7, 10, topic_text, align="L", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             self.ln(10)
 
             qr_size = 50
@@ -134,7 +147,8 @@ class PDF(FPDF):
                 qr_size,
             )
 
-    def footer(self) -> None:
+    def footer(self: PDF) -> None:
+        """Displays the footer of the document."""
         self.set_y(-1 * self.margin + 5)
         self.set_font(self.font, "", self.footer_font_size)
         self.set_text_color(180, 180, 180)
@@ -145,7 +159,7 @@ class PDF(FPDF):
         date_text = f"Dátum: {self.date.replace('-', '.')}."
         self.cell(0, 0, date_text, align="R", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
-    def add_questions(self) -> None:
+    def add_questions(self: PDF) -> None:
         """Displays the selected questions and options."""
         # TODO: Cell overflow is still not working due to changing text character width
         cell_width = (self.w - 2 * self.margin) / 4
@@ -167,10 +181,7 @@ class PDF(FPDF):
                 self.multi_cell(cell_width, 5, f"{letter}) {option}", align="L")
                 self.set_y(original_y)
 
-                cell_overflow = max(
-                    self.get_string_width(f"{letter}) {option}") // cell_width,
-                    cell_overflow,
-                )
+                cell_overflow = max(int(self.get_string_width(f"{letter}) {option}") // cell_width), cell_overflow)
 
             if self.h - self.get_y() < self.margin * 3 and question != self.questions[-1]:
                 self.add_page()
@@ -178,7 +189,7 @@ class PDF(FPDF):
                 self.ln(10 + cell_overflow * 5)
         self.last_page = True
 
-    def add_checkmark_boxes(self) -> None:
+    def add_checkmark_boxes(self: PDF) -> None:
         """Displays the boxes at the last page, where the answers are selected."""
         # TODO: Give circles equal spaces from the borders
         number_of_blocks = ((len(self.questions) - 1) // 5) + 1
@@ -197,10 +208,10 @@ class PDF(FPDF):
 
         # TODO: Fix duplicate code
         for block in range(number_of_blocks):
-            if block == 2:
+            if block == 2:  # noqa: PLR2004
                 self.set_y(original_y)
 
-            if block >= 2:
+            if block >= 2:  # noqa: PLR2004
                 self.set_x(self.get_x() + total_width / 2)
 
             # Options
@@ -209,7 +220,7 @@ class PDF(FPDF):
                 self.cell(column_width, 0, s, align="C")
             self.cell(0, 5, "", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
-            if block >= 2:
+            if block >= 2:  # noqa: PLR2004
                 self.set_x(self.get_x() + total_width / 2)
 
             # Rectangles
@@ -230,7 +241,7 @@ class PDF(FPDF):
             for question_number in range(1, 6):
                 self.set_y(self.get_y() + circle_diameter / 2)
 
-                if block >= 2:
+                if block >= 2:  # noqa: PLR2004
                     self.set_x(self.get_x() + total_width / 2 + circle_diameter / 2)
                 else:
                     self.set_x(self.get_x() + circle_diameter / 2)
@@ -239,7 +250,7 @@ class PDF(FPDF):
                 self.set_x(self.get_x() + column_gap)
                 self.set_y(self.get_y() - circle_diameter / 2)
 
-                if block >= 2:
+                if block >= 2:  # noqa: PLR2004
                     self.set_x(self.get_x() + total_width / 2)
                 # Circles
                 self.set_x(self.get_x() + column_gap / 2)
@@ -251,11 +262,11 @@ class PDF(FPDF):
 
             self.ln(15)
 
-    def create_solution_qr_image(self) -> Image.Image:
+    def create_solution_qr_image(self: PDF) -> Image.Image:
         """Encodes the necessary information into a string and creates a QR code from it."""
         question_data = " ".join([str(question.index) for question in self.questions])
         correct_data = " ".join([str(question.correct) for question in self.questions])
-        assessment_data = "; ".join([self.student, self.date, question_data, correct_data])
+        assessment_data = "; ".join([self.student, self.date, question_data, correct_data])  # noqa: FLY002
 
         random.seed(0)
         salt = random.getrandbits(128).to_bytes(16, sys.byteorder)
@@ -265,14 +276,12 @@ class PDF(FPDF):
         fernet = Fernet(key)
         token = fernet.encrypt(assessment_data.encode("utf-8"))
         qr_image = qrcode.make(token)
-        qr_image = qr_image.convert("RGB")
-        return qr_image
+        return qr_image.convert("RGB")  # type: ignore [no-any-return]
 
-    def create_pocket_qr_image(self) -> Image.Image:
+    def create_pocket_qr_image(self: PDF) -> Image.Image:
         """Creates a QR code pointing to the webpage where the assessment can be uploaded."""
         if not self.pocket_id:
             return Image.new("RGB", (1, 1), color="white")
         pocket_url = f"https://pythonvilag.hu/checkmark/pocket/{self.pocket_id}/"
         qr_image = qrcode.make(pocket_url)
-        qr_image = qr_image.convert("RGB")
-        return qr_image
+        return qr_image.convert("RGB")  # type: ignore [no-any-return]

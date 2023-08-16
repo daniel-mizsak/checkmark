@@ -1,3 +1,9 @@
+"""
+Question class and related functions.
+
+@author "Daniel Mizsak" <info@pythonvilag.hu>
+"""
+
 from __future__ import annotations
 
 import copy
@@ -7,11 +13,18 @@ import pandas as pd
 
 
 class Question:
-    """
-    Question class to store the data of each question in an assessment.
-    """
+    """Question class to store the data of each question in an assessment."""
 
-    def __init__(self, index: int, body: str, options: list[str], correct: int) -> None:
+    def __init__(self: Question, index: int, body: str, options: list[str], correct: int) -> None:
+        """Initializes the Question object.
+
+        Args:
+            self (Question): The Question object.
+            index (int): The index of the question.
+            body (str): The body of the question.
+            options (list[str]): The options of the question.
+            correct (int): The index of the correct answer.
+        """
         self.index = index
         self.body = body
         self.options = options
@@ -19,9 +32,8 @@ class Question:
 
         self.shuffle_index_list = list(range(len(self.options)))
 
-    def is_question_valid(self, questions: list[Question]) -> bool:
-        """Validates the question to ensure that each question has a unique index
-        and a valid correct answer.
+    def is_question_valid(self: Question, questions: list[Question]) -> bool:
+        """Validates the question to ensure that each question has a unique index and a valid correct answer.
 
         Args:
             questions (list[Question]): Already validated questions.
@@ -34,25 +46,23 @@ class Question:
             bool: True if the question is valid.
         """
         if self.index in [q.index for q in questions]:
-            raise KeyError(f"Több {self.index} számú kérdés van az Excel táblában.")
+            msg = f"Több {self.index} számú kérdés van az Excel táblában."
+            raise KeyError(msg)
         if self.correct not in range(4):
-            raise ValueError(f"A {self.index} számú kérdés megoldása nem A, B, C vagy D.")
+            msg = f"A {self.index} számú kérdés megoldása nem A, B, C vagy D."
+            raise ValueError(msg)
         return True
 
-    def shuffled(self) -> Question:
-        """
-        Shuffles the options of the question and returns a new Question object.
-        """
+    def shuffled(self: Question) -> Question:
+        """Shuffles the options of the question and returns a new Question object."""
         shuffled = copy.deepcopy(self)
         random.shuffle(self.shuffle_index_list)
         shuffled.correct = self.shuffle_index_list.index(shuffled.correct)
-        shuffled.options = list(self.options[index] for index in self.shuffle_index_list)
+        shuffled.options = [self.options[index] for index in self.shuffle_index_list]
         return shuffled
 
-    def __repr__(self) -> str:
-        """
-        Returns a string representation of the question.
-        """
+    def __repr__(self: Question) -> str:
+        """Returns a string representation of the question."""
         return (
             f"Question(index={self.index}, "
             f"body={self.body}, "
@@ -88,9 +98,9 @@ def read_questions_from_excel(path: str) -> list[Question]:
 
 def select_questions(
     all_questions: list[Question],
-    question_number: int = 1,
-    random_questions: bool = False,
-    random_option_order: bool = False,
+    question_number: int,
+    random_questions: bool,  # noqa: FBT001
+    random_option_order: bool,  # noqa: FBT001
 ) -> list[Question]:
     """Select a subset of questions from the list of all questions.
 
@@ -105,7 +115,7 @@ def select_questions(
         list[Question]: List of selected questions.
     """
     if random_questions:
-        selected_indices = random.sample([i for i in range(len(all_questions))], k=question_number)
+        selected_indices = random.sample(list(range(len(all_questions))), k=question_number)
     else:
         selected_indices = list(range(question_number))
 
