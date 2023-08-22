@@ -11,9 +11,7 @@ from PIL import Image
 from pyzbar import pyzbar
 
 
-def decode_solution_data(
-    qr_img: Image.Image, password: str | None = None
-) -> tuple[str, str, list[int], list[int]]:
+def decode_solution_data(qr_img: Image.Image, password: str | None = None) -> tuple[str, str, list[int], list[int]]:
     if password is None:
         with open("data/app_data/data.json", "r", encoding="utf-8") as f:
             password = json.loads(f.read())["password"]
