@@ -23,9 +23,7 @@ from pillow_heif import register_heif_opener
 from pyzbar import pyzbar
 
 
-def decode_solution_data(
-    qr_img: Image.Image, password: str | None = None
-) -> tuple[str, str, list[int], list[int]]:
+def decode_solution_data(qr_img: Image.Image, password: str | None = None) -> tuple[str, str, list[int], list[int]]:
     if password is None:
         with open("data/app_data/data.json", "r", encoding="utf-8") as file_handle:
             password = json.loads(file_handle.read())["password"]
@@ -73,9 +71,7 @@ def evaluate_assessment(
 
     score, corrected_images = grade_test(warped_images, correct_answers, given_answers)
 
-    result_image = get_inverse_warped_images(
-        image.shape[1], image.shape[0], contours, image, corrected_images
-    )
+    result_image = get_inverse_warped_images(image.shape[1], image.shape[0], contours, image, corrected_images)
     return score, result_image
 
 
@@ -173,9 +169,7 @@ def x_marks_the_spot(image, contours, correct_answers):
     cumulator = [[0, 0, 0, 0, 0] for _ in correct_answers]
     uncertains = [0 for _ in correct_answers]
     for threshold in range(16, 240, 4):
-        warped_images = get_warped_images(
-            image.shape[1], image.shape[0], contours, image, threshold1=threshold
-        )
+        warped_images = get_warped_images(image.shape[1], image.shape[0], contours, image, threshold1=threshold)
         given_answers = get_answers(warped_images)
 
         ### debug ###
@@ -276,10 +270,7 @@ def get_answers(warped_images):
                 box_size = box.shape[0] * box.shape[1]
                 pixel_values[c] = cv2.countNonZero(box)
             sorted_values = sorted(pixel_values, reverse=True)
-            if (
-                sorted_values[0] - sorted_values[1]
-                > box_size * 0.01 + sorted_values[1] - sorted_values[-1]
-            ):
+            if sorted_values[0] - sorted_values[1] > box_size * 0.01 + sorted_values[1] - sorted_values[-1]:
                 assessment_answers.append(np.argmax(pixel_values))
             else:
                 assessment_answers.append(None)
