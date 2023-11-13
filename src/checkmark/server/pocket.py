@@ -45,9 +45,7 @@ def send_email(data: Pocket) -> None:
         EMAIL_ADDRESS = config["EMAIL_ADDRESS"]
         EMAIL_PASSWORD = config["EMAIL_PASSWORD"]
     except KeyError as e:
-        raise KeyError(
-            "Config variables are missing. Check .env file or add environment variables."
-        ) from e
+        raise KeyError("Config variables are missing. Check .env file or add environment variables.") from e
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = "Checkmark generated assessment"
