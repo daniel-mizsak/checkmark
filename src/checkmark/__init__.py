@@ -1,3 +1,9 @@
+"""
+Init file for checkmark package.
+
+@author "Daniel Mizsak" <info@pythonvilag.hu>
+"""
+
 import importlib.metadata
 import os
 

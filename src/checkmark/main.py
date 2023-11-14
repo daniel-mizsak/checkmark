@@ -37,8 +37,7 @@ def parse_arguments() -> argparse.Namespace:
 
     subparsers.add_parser("evaluate", help="Graphical User Interface for Assessment Evaluation")
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main() -> bool:
@@ -46,11 +45,11 @@ def main() -> bool:
     args = parse_arguments()
 
     if args.version:
-        print(f"Checkmark v{importlib.metadata.version('checkmark')}")
+        print(f"Checkmark v{importlib.metadata.version('checkmark')}")  # noqa: T201
         return True
 
     if args.command is None:
-        print("No command given. Use --help for more information.")
+        print("No command given. Use --help for more information.")  # noqa: T201
         return False
 
     if args.command == "generate":

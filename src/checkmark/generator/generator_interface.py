@@ -372,13 +372,13 @@ class StudentPage(tk.Frame):
     def _select_students(self: StudentPage) -> None:
         """Selects all of the student if not all selected, otherwise deselects them."""
         if self.controller.validator.validate_available_students(self.available_students):
-            if len(self.student_listbox.curselection()) != len(self.available_students):  # type: ignore [no-untyped-call]  # noqa: E501
+            if len(self.student_listbox.curselection()) != len(self.available_students):  # type: ignore [no-untyped-call]
                 self.student_listbox.selection_set(0, tk.END)
             else:
                 self.student_listbox.selection_clear(0, tk.END)
             self._update_select_button()
 
-    def _update_select_button(self: StudentPage, *args) -> None:  # type: ignore [no-untyped-def]  # noqa: ANN002, ARG002, E501
+    def _update_select_button(self: StudentPage, *args) -> None:  # type: ignore [no-untyped-def]  # noqa: ANN002, ARG002
         """Updates the text of the select students button."""
         if len(self.student_listbox.curselection()) != len(self.available_students):  # type: ignore [no-untyped-call]
             self.select_students_button.configure(text=self.student_page_language["select_students_button_all"])
@@ -492,7 +492,7 @@ class DataPage(tk.Frame):
         self.online_evaluator_booleanvar.set(value=False)
         self.online_evaluator_checkbutton.config(variable=self.online_evaluator_booleanvar)
 
-    def online_evaluator_connection(self: DataPage, *args) -> None:  # type: ignore [no-untyped-def]  # noqa: ANN002, ARG002, E501
+    def online_evaluator_connection(self: DataPage, *args) -> None:  # type: ignore [no-untyped-def]  # noqa: ANN002, ARG002
         """Checks for online evaluator connection if the checkbutton is selected."""
         if (
             self.online_evaluator_booleanvar.get()
