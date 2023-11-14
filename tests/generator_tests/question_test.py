@@ -18,10 +18,7 @@ def test_read_questions_from_excel(temp_excel_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    "random_questions, "
-    "random_option_order, "
-    "expected_questions, "
-    "expected_option_order_for_first_question",
+    "random_questions, " "random_option_order, " "expected_questions, " "expected_option_order_for_first_question",
     [
         (False, False, [1, 2, 3], ["A1", "B1", "C1", "D1"]),
         (False, True, [1, 2, 3], ["C1", "A1", "B1", "D1"]),
@@ -60,7 +57,4 @@ def test_is_question_valid(temp_excel_path: Path) -> None:
 def test_qestion_repr(temp_excel_path: Path) -> None:
     question = read_questions_from_excel(str(temp_excel_path / "correct.xlsx"))[0]
     print(repr(question))
-    assert (
-        repr(question)
-        == "Question(index=1, body=Kérdés 1, options=['A1', 'B1', 'C1', 'D1'], correct=0)"
-    )
+    assert repr(question) == "Question(index=1, body=Kérdés 1, options=['A1', 'B1', 'C1', 'D1'], correct=0)"

@@ -25,9 +25,7 @@ def parse_arguments() -> argparse.Namespace:
 
     subparsers = parser.add_subparsers(title="Commands", dest="command")
 
-    generate_parser = subparsers.add_parser(
-        "generate", help="Graphical User Interface for Assessment Generation"
-    )
+    generate_parser = subparsers.add_parser("generate", help="Graphical User Interface for Assessment Generation")
     generate_parser.add_argument(
         "--language",
         type=str,

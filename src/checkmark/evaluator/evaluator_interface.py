@@ -12,14 +12,12 @@ from ttkbootstrap import Style
 
 
 class EvaluatorInterface(tk.Tk):
-    """
-    Graphical User Interface for assessment evaluation.
-    """
+    """Graphical User Interface for assessment evaluation."""
 
     def __init__(self) -> None:
         # TODO: Support multiple languages
         tk.Tk.__init__(self)
-        self.iconphoto(True, tk.PhotoImage(file="data/app/icon_e.png"))
+        self.iconphoto(True, tk.PhotoImage(file="data/app/icon.png"))
         window_width = 680
         window_height = 440
         top_left_x = (self.winfo_screenwidth() - window_width) // 2
