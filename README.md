@@ -1,20 +1,20 @@
 ## <div align="center"> ✅ checkmark</div>
-<br>
 
-[![build status](https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yaml/badge.svg)](https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yaml)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/daniel-mizsak/checkmark/main.svg)](https://results.pre-commit.ci/latest/github/daniel-mizsak/checkmark/main)
-[![license](https://img.shields.io/github/license/daniel-mizsak/checkmark)](https://img.shields.io/github/license/daniel-mizsak/checkmark)
+<div align="center">
+<a href="https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yml" target="_blank"><img src="https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yml/badge.svg" alt="build status"></a>
+<a href="https://results.pre-commit.ci/latest/github/daniel-mizsak/checkmark/main" target="_blank"><img src="https://results.pre-commit.ci/badge/github/daniel-mizsak/checkmark/main.svg" alt="pre-commit.ci status"></a>
+<a href="ttps://img.shields.io/github/license/daniel-mizsak/checkmark" target="_blank"><img src="https://img.shields.io/github/license/daniel-mizsak/checkmark" alt="license"></a>
+</div>
 
 
+## Overview
 Checkmark is an automated assessment generator and evaluator system.
 
-It works with a predefined question pool and a list of students, and generates quizzes in a format that later can be automatically evaluated by taking a picture of the submission.
+It works with a predefined question pool and a list of students, and generates quizzes in a format that later can be automatically evaluated by taking a picture of the submission.<br>
 
-<br>
 
-## <div align="center"> Description </div>
-<details>
-<summary>Motivation</summary>
+## Getting started
+### Motivation
 Tools that enable us to automatically evaluate quizzes have been around for years.
 One example for this is the <a href="https://mateprod.blob.core.windows.net/media/Default/images/Kodlap_Minta.pdf">International Kangaroo Mathematics Contest</a>, which is a multiple-choice test, and the evaluation is done by a computer.
 
@@ -22,32 +22,36 @@ However, these tools require a very specific layout for the submission of the so
 
 Unfortunately **Checkmark** is not able solve the general problem and evaluate any kind of submission, but it tries to solve the problem by enabling teachers to generate assessments from their own question pool in an expected layout format.
 This makes it possible to evaluate these assessments automatically by scanning the submissions with a mobile phone and thus saving a lot of time for the teachers.
-</details>
-
 <br>
 
-<details>
-<summary>Installation</summary>
+### Installation
 Currenly the application is only runnable from the source code. However, it is planned to create a standalone executable file in the future.
 
 To run the application you need `python` installed on your computer.
 
-- Create and activate a new virtual environment in the root folder of the project ([how to use venv](https://docs.python.org/3/library/venv.html))
+- Create and activate a new virtual environment in the root folder of the project:
+    ```
+    python -m venv .venv
+    source .venv/bin/activate
+    ```
 
 - Install the code as a packages:
-    `pip install -e .`
+    ```
+    pip install -e .
+    ```
 
 - Verify that the installation was successful:
-    `checkmark --version`
+    ```
+    checkmark --version
+    ```
 
 - Run the GUI and generate some assessments:
-    `checkmark --generator`
-</details>
-
+    ```
+    checkmark generator
+    ```
 <br>
 
-<details>
-<summary>How to use</summary>
+### How to use
 To use the application the following files are needed:
 
 - Questions in an *Excel* file (with the expected format) located in the following folder:
@@ -55,21 +59,3 @@ To use the application the following files are needed:
 
 - List of students of each class in a *csv* file located as such:
 `data/classes/<CLASS NUMBER>-<CLASS TYPE>.csv`
-</details>
-
-## <div align="center"> Future plans</div>
-The following features are planned to be implemented in the future:
-- New question types such as *True/False*, *Ordering*, *Fill in the blanks*
-- Unassigned assessments for students being late from class
-- Group assignments instead of individual ones
-- Inserting images between questions
-- Low effort question sharing between teachers
-- Standalone executable file
-- Detailed documentation about the results of the class
-
-
-## <div align="center"> Contribute</div>
-
-[Daniel Mizsak](https://www.linkedin.com/in/daniel-mizsak)
-
-[Samu Pecsenye](https://www.linkedin.com/in/samu-pecsenye/)

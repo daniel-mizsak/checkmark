@@ -21,5 +21,5 @@ def test_generate_pocket_data():
 def test_send_pocket_data():
     students = ["John Doe", "Jane Doe"]
     date = "2042-01-01"
-    pocket_data = generate_pocket_data(students, date)
+    pocket_data = _generate_pocket_data(students, date)
     assert not _send_pocket_data(pocket_data)

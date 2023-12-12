@@ -176,7 +176,7 @@ class PDF(FPDF):
 
             original_y = self.get_y()
             cell_overflow = 0
-            for num, (letter, option) in enumerate(zip("ABCD", question.options)):
+            for num, (letter, option) in enumerate(zip("ABCD", question.options, strict=True)):
                 self.set_x(self.margin + num * cell_width)
                 self.multi_cell(cell_width, 5, f"{letter}) {option}", align="L")
                 self.set_y(original_y)

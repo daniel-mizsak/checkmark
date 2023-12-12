@@ -35,12 +35,9 @@ def register_pocket() -> Response:
         jsondata = str(request.get_json())
         pocket_data = json.loads(jsondata)
 
-        folder_path = os.path.join(
-            sys.path[0],
-            f"pythonvilag_website/static/checkmark/{pocket_data['pocket_id']}",
-        )
-        os.makedirs(folder_path, exist_ok=True)
-        with open(f"{folder_path}/pocket_data.json", "w", encoding="utf-8") as file_handle:
+        folder_path = Path(sys.path[0]) / Path(f"pythonvilag_website/static/checkmark/{pocket_data['pocket_id']}")
+        folder_path.mkdir(exist_ok=True)
+        with (folder_path / Path("pocket_data.json")).open("w", encoding="utf-8") as file_handle:
             json.dump(pocket_data, file_handle, indent=4, ensure_ascii=False)
 
     return make_response("Success", 200)
@@ -49,12 +46,12 @@ def register_pocket() -> Response:
 @checkmark_page.route("/pocket/<pocket_id>/", methods=["GET", "POST"])
 def upload_file(pocket_id: str) -> str | Response:
     """Upload assessment to the server and evaluate it."""
-    folder_path = os.path.join(sys.path[0], "pythonvilag_website/static/checkmark")
+    folder_path = Path(sys.path[0]) / Path("pythonvilag_website/static/checkmark")
     available_pockets = os.listdir(folder_path)
     if pocket_id not in available_pockets:
         return abort(404)
 
-    with open(f"{folder_path}/{pocket_id}/pocket_data.json", "r", encoding="utf-8") as file_handle:
+    with (folder_path / Path(pocket_id) / Path("pocket_data.json")).open("r", encoding="utf-8") as file_handle:
         pocket_data = json.load(file_handle)
 
     if request.method != "POST":
