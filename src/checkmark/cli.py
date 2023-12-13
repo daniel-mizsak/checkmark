@@ -4,8 +4,6 @@ Main module of the checkmark application.
 @author "Daniel Mizsak" <info@pythonvilag.hu>
 """
 
-from __future__ import annotations
-
 import argparse
 import importlib.metadata
 

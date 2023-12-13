@@ -43,15 +43,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "black",
-    "furo",
     "mypy",
     "pre-commit",
     "pytest-cov",
     "pytest",
     "ruff",
-    "sphinx-copybutton",
-    "sphinx",
     "tox",
     # Stubs
     "pandas-stubs",
@@ -61,7 +57,7 @@ dev = [
 ]
 
 [project.scripts]
-checkmark = "checkmark.main:main"
+checkmark = "checkmark.cli:main"
 
 [project.urls]
 Repository = "https://github.com/daniel-mizsak/checkmark"
