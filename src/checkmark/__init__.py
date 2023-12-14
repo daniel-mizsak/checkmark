@@ -5,7 +5,11 @@ Init file for checkmark package.
 """
 
 import importlib.metadata
-import os
+import locale
 
-os.environ["LC_ALL"] = "hu_HU.UTF-8"
+try:
+    locale.setlocale(locale.LC_ALL, "hu_HU.UTF-8")
+except locale.Error:
+    locale.setlocale(locale.LC_ALL, "C.UTF-8")
+
 __version__ = importlib.metadata.version("checkmark")

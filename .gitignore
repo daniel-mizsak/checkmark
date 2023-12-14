@@ -7,18 +7,19 @@ data/generated/
 .DS_Store
 
 # Distribution / Packaging
+.eggs/
+*.egg
+*.egg-info/
 build/
 dist/
 eggs/
-.eggs/
 sdist/
 wheels/
-*.egg-info/
-*.egg
 
 # Unit tests / Coverage reports
-.tox
 .coverage
+.tox
+htmlcov/
 
 # Environments
 .env

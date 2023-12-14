@@ -1,5 +1,5 @@
 """
-Short description and source of base code.
+Checkmark.
 
 @author "Daniel Mizsak" <info@pythonvilag.hu>
 """

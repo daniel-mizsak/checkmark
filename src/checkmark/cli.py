@@ -1,17 +1,18 @@
 """
-Main module of the checkmark application.
+Command Line Interface for the Checkmark application.
 
 @author "Daniel Mizsak" <info@pythonvilag.hu>
 """
 
 import argparse
 import importlib.metadata
+import sys
 
 from checkmark.evaluator.evaluator_interface import EvaluatorInterface
 from checkmark.generator.generator_interface import GeneratorInterface
 
 
-def parse_arguments() -> argparse.Namespace:
+def _parse_arguments() -> argparse.Namespace:
     """Parses command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -38,24 +39,21 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> bool:
+def main() -> int:
     """Main function of the checkmark application."""
-    args = parse_arguments()
+    args = _parse_arguments()
 
     if args.version:
         print(f"Checkmark v{importlib.metadata.version('checkmark')}")  # noqa: T201
-        return True
-
-    if args.command is None:
-        print("No command given. Use --help for more information.")  # noqa: T201
-        return False
+        return 0
 
     if args.command == "generate":
         GeneratorInterface(args.language).mainloop()
-        return True
+        return 0
 
     if args.command == "evaluate":
         EvaluatorInterface().mainloop()
-        return True
+        return 0
 
-    return False
+    print("Error! No command given. Use --help for more information.", file=sys.stderr)  # noqa: T201
+    return 1
