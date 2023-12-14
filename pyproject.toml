@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 # Project Metadata
 [project]
-name = "checkmark"
+name = "checkmark-assistant"
 version = "0.1.0"
 description = "Automatically create and evaluate assessments."
 readme = "README.md"
@@ -64,6 +64,10 @@ Repository = "https://github.com/daniel-mizsak/checkmark"
 Homepage = "https://pythonvilag.hu/pv/projects/checkmark"
 
 # Tools
+# Hatch
+[tool.hatch.build.targets.wheel]
+packages = ["src/checkmark"]
+
 # MyPy
 [tool.mypy]
 exclude = ["^tests/"]

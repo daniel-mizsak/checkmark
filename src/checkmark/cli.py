@@ -44,7 +44,7 @@ def main() -> int:
     args = _parse_arguments()
 
     if args.version:
-        print(f"Checkmark v{importlib.metadata.version('checkmark')}")  # noqa: T201
+        print(f"Checkmark v{importlib.metadata.version('checkmark-assistant')}")  # noqa: T201
         return 0
 
     if args.command == "generate":
