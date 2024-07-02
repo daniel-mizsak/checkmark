@@ -1,7 +1,7 @@
 ## <div align="center"> ✅ checkmark</div>
 
 <div align="center">
-<a href="https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yml" target="_blank"><img src="https://github.com/daniel-mizsak/checkmark/actions/workflows/main.yml/badge.svg" alt="build status"></a>
+<a href="https://github.com/daniel-mizsak/checkmark/actions/workflows/ci.yml" target="_blank"><img src="https://github.com/daniel-mizsak/checkmark/actions/workflows/ci.yml/badge.svg" alt="build status"></a>
 <a href="https://results.pre-commit.ci/latest/github/daniel-mizsak/checkmark/main" target="_blank"><img src="https://results.pre-commit.ci/badge/github/daniel-mizsak/checkmark/main.svg" alt="pre-commit.ci status"></a>
 <a href="ttps://img.shields.io/github/license/daniel-mizsak/checkmark" target="_blank"><img src="https://img.shields.io/github/license/daniel-mizsak/checkmark" alt="license"></a>
 </div>

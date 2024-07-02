@@ -757,6 +757,6 @@ class InterfaceValidation:
             response = requests.get(url, timeout=5)
         except requests.exceptions.ConnectionError:
             return False
-        if response.status_code != ok_response:
+        if response.status_code != ok_response:  # noqa: SIM103
             return False
         return True
